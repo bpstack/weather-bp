@@ -12,9 +12,9 @@ const weatherSchema = z.object({
   }),
   daily: z.object({
     time: z.array(z.string()),
-    temperature_2m_max: z.array(z.number()),
-    temperature_2m_min: z.array(z.number()),
-    weather_code: z.array(z.number()),
+    temperature_2m_max: z.array(z.number().nullable()),
+    temperature_2m_min: z.array(z.number().nullable()),
+    weather_code: z.array(z.number().nullable()),
   }),
 });
 
@@ -30,6 +30,9 @@ interface FetchWeatherArgs {
   country: string;
   days?: 16 | 7;
 }
+
+const fillNulls = (value: number | null | undefined, fallback: number | null = null) =>
+  value === null || value === undefined ? fallback : value;
 
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 
@@ -48,7 +51,24 @@ export async function fetchWeather({
   }
 
   const json = await res.json();
-  const parsed = weatherSchema.parse(json);
+
+  // Algunas ubicaciones devuelven null en daily; normalizamos a number | null y rellenamos si es necesario
+  const normalizeDaily = (arr: Array<number | null> | undefined, fill: number | null = null) => {
+    if (!Array.isArray(arr)) return [] as Array<number | null>;
+    return arr.map((v) => (v === null ? fill : v));
+  };
+
+  const safeJson = {
+    ...json,
+    daily: {
+      ...json.daily,
+      temperature_2m_max: normalizeDaily(json.daily?.temperature_2m_max).map((v) => fillNulls(v)),
+      temperature_2m_min: normalizeDaily(json.daily?.temperature_2m_min).map((v) => fillNulls(v)),
+      weather_code: normalizeDaily(json.daily?.weather_code).map((v) => fillNulls(v)),
+    },
+  };
+
+  const parsed = weatherSchema.parse(safeJson);
 
   return {
     ...parsed,

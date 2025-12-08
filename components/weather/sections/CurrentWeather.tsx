@@ -8,7 +8,7 @@ interface Props {
   weather: WeatherData;
   tempUnit: "C" | "F";
   setTempUnit: (unit: "C" | "F") => void;
-  convertTemp: (t: number) => number;
+  convertTemp: (t: number | null) => number | string;
   getWeatherInfo: typeof getWeatherInfo;
   getWeatherIcon: typeof getWeatherIcon;
 }
@@ -24,7 +24,7 @@ export default function CurrentWeather({
 }: Props) {
   return (
     <div className="bg-layer-1 border border-layer-3 rounded-lg overflow-hidden">
-      <div className={`p-5 bg-gradient-to-r ${getWeatherInfo(weather.current.weather_code).bg} dark:bg-none`}>
+      <div className={`p-5 bg-gradient-to-r ${getWeatherInfo(weather.current.weather_code ?? null).bg} dark:bg-none`}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-baseline gap-2 mb-1">
@@ -51,8 +51,8 @@ export default function CurrentWeather({
               </div>
             </div>
 
-            <div className={`text-lg font-medium mb-1 ${getWeatherInfo(weather.current.weather_code).color}`}>
-              {getWeatherInfo(weather.current.weather_code).text}
+            <div className={`text-lg font-medium mb-1 ${getWeatherInfo(weather.current.weather_code ?? null).color}`}>
+              {getWeatherInfo(weather.current.weather_code ?? null).text}
             </div>
 
             <div className="flex items-center gap-2 text-xs text-text-secondary">
@@ -61,7 +61,8 @@ export default function CurrentWeather({
             </div>
           </div>
 
-          <div className="hidden sm:block">{getWeatherIcon(weather.current.weather_code, "lg")}</div>
+           <div className="hidden sm:block">{getWeatherIcon(weather.current.weather_code ?? null, "lg")}</div>
+
         </div>
       </div>
     </div>

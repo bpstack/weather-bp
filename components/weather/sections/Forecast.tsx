@@ -7,7 +7,7 @@ interface Props {
   weather: WeatherData;
   forecastDays: 7 | 16;
   setForecastDays: (d: 7 | 16) => void;
-  convertTemp: (t: number) => number;
+  convertTemp: (t: number | null) => number | string;
   getWeatherInfo: typeof getWeatherInfo;
   getWeatherIcon: typeof getWeatherIcon;
   icons?: typeof defaultIcons;
@@ -57,7 +57,8 @@ export default function Forecast({
               }`}
             >
               <div className="flex items-center gap-3 flex-1">
-                {getWeatherIcon(weather.daily.weather_code[i], "sm")}
+                {getWeatherIcon(weather.daily.weather_code[i] ?? null, "sm")}
+
                 <div>
                   <span className="font-medium text-text-primary text-sm block">
                     {isToday
@@ -80,8 +81,9 @@ export default function Forecast({
                   {getWeatherInfo(weather.daily.weather_code[i]).text}
                 </span>
                 <div className="flex gap-3 text-sm">
-                  <span className="font-bold text-text-primary">{convertTemp(weather.daily.temperature_2m_max[i])}°</span>
-                  <span className="text-text-secondary">{convertTemp(weather.daily.temperature_2m_min[i])}°</span>
+                   <span className="font-bold text-text-primary">{convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°</span>
+                   <span className="text-text-secondary">{convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°</span>
+
                 </div>
               </div>
             </div>

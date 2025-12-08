@@ -42,9 +42,10 @@ import {
  };
 
 
-export const getWeatherIcon = (code: number, size: "sm" | "lg" = "lg"): ReactNode => {
+export const getWeatherIcon = (code: number | null, size: "sm" | "lg" = "lg"): ReactNode => {
   const sizeClass = size === "lg" ? "w-12 h-12" : "w-5 h-5";
 
+  if (code === null || code === undefined) return <Cloud className={`${sizeClass} text-text-secondary`} />;
   if (code === 0) return <Sun className={`${sizeClass} text-yellow-500`} />;
   if (code <= 2)
     return (
@@ -62,7 +63,7 @@ export const getWeatherIcon = (code: number, size: "sm" | "lg" = "lg"): ReactNod
 };
 
 export const getWeatherInfo = (
-  code: number,
+  code: number | null,
 ): { text: string; color: string; bg: string } => {
   const info: { [key: number]: { text: string; color: string; bg: string } } = {
     0: { text: "Despejado", color: "text-yellow-600", bg: "from-yellow-50 to-orange-50" },
@@ -75,5 +76,8 @@ export const getWeatherInfo = (
     71: { text: "Nieve ligera", color: "text-cyan-500", bg: "from-cyan-50 to-blue-50" },
     95: { text: "Tormenta", color: "text-purple-600", bg: "from-purple-50 to-gray-100" },
   };
+  if (code === null || code === undefined) {
+    return { text: "Desconocido", color: "text-gray-500", bg: "from-gray-50 to-gray-100" };
+  }
   return info[code] || { text: "Desconocido", color: "text-gray-500", bg: "from-gray-50 to-gray-100" };
 };

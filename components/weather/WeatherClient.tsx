@@ -100,7 +100,8 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
     setSelectedContinent("Todos");
   };
 
-  const convertTemp = (temp: number) => {
+  const convertTemp = (temp: number | null) => {
+    if (temp === null || temp === undefined) return "-";
     if (tempUnit === "F") return Math.round((temp * 9) / 5 + 32);
     return Math.round(temp);
   };
