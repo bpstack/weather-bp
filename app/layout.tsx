@@ -22,6 +22,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Weather BP",
   description: "Aplicación del tiempo con Open-Meteo",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

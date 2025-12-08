@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Weather icon">
+  <circle cx="22" cy="22" r="10" stroke="#0EA5E9" stroke-width="3"/>
+  <path d="M35 46h12a8 8 0 0 0 0-16 12 12 0 0 0-23.5-3" stroke="#0EA5E9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 46h19" stroke="#0EA5E9" stroke-width="3" stroke-linecap="round"/>
+</svg>
