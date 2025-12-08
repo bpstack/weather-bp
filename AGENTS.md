@@ -1,0 +1,22 @@
+# AGENTS
+
+- Install deps: `pnpm install` (use pnpm, not npm). Dev server: `pnpm dev`. Build: `pnpm build`. Lint: `pnpm lint`. No tests yet; if added with Vitest/Jest, run single test via `pnpm test -- <pattern>`.
+- Use Next.js App Router conventions; prefer Server Components for data fetching; mark client files with `'use client'`.
+- Tailwind v3 with `darkMode: "class"`; theme tokens come from CSS variables in `app/globals.css`; avoid inline colors; use semantic classes (`bg-layer-1`, `text-text-secondary`, etc.).
+- Keep imports ordered: react/next first, then third-party, then aliases (`@/`), then relative; no unused imports.
+- Formatting: rely on project defaults (Next/ESLint). Two-space indentation typical; keep lines concise; prefer multiline for long prop lists.
+- Types: enable strict TS; type API responses; avoid `any`; prefer discriminated unions or schemas (zod) if validating API payloads.
+- Naming: PascalCase for components, camelCase for functions/vars, CONSTANT_CASE for env-like values. Files in `components/` should be PascalCase when exporting components.
+- Error handling: surface user-friendly messages; log technical details to console only when useful; handle fetch failures gracefully.
+- Accessibility: prefer semantic HTML, `aria-label` on icon-only buttons/links, and focus-visible states.
+- State: avoid duplicate fetches; memoize expensive derivations; prefer SWR/React Query for client caching when possible.
+- CSS: keep global resets in `globals.css`; prevent horizontal scroll; keep transitions subtle; ensure dark/light colors defined in :root/.dark.
+- Assets/public: store images/icons in `public/`; import via next/image when appropriate.
+- Routing: place pages in `app/`; avoid legacy `pages/` unless necessary.
+- Git: commit messages should be clear and purposeful; do not commit generated artifacts like `.next/` or `node_modules/`.
+- Dependencies: prefer lightweight libs; if adding charts/animation (Recharts/Framer Motion), tree-shake and lazy-load when possible.
+- Security: never commit secrets; use env vars via `.env.local` and `process.env` (server-only where possible).
+- Testing (future): if adding tests, colocate near modules or under `__tests__`; keep them deterministic and mock network.
+- Performance: leverage Next revalidate/caching for Open-Meteo; avoid unnecessary client JS for static data.
+- Internationalization: if adding i18n, centralize translations and avoid inline literals sprinkled in components.
+- Documentation: update README when changing setup commands or env requirements.
