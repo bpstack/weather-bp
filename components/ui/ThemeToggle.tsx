@@ -1,38 +1,80 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { Moon, Sun } from 'lucide-react';
 
 const STORAGE_KEY = 'weather-bp-theme';
+type Theme = 'light' | 'dark';
+
+type SnapshotFn = () => Theme;
+
+type Subscriber = () => void;
+
+const getStoredTheme = (): Theme | null => {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored === 'light' || stored === 'dark' ? stored : null;
+};
+
+const getPreferredTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
+const applyTheme = (theme: Theme) => {
+  if (typeof document === 'undefined') return;
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+};
+
+let themeStore: Theme = getStoredTheme() ?? getPreferredTheme();
+const subscribers = new Set<Subscriber>();
+let listenersBound = false;
+
+const notify = () => {
+  subscribers.forEach((listener) => listener());
+};
+
+const setThemeStore = (nextTheme: Theme) => {
+  if (themeStore === nextTheme) return;
+  themeStore = nextTheme;
+  applyTheme(nextTheme);
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, nextTheme);
+  }
+  notify();
+};
+
+applyTheme(themeStore);
+
+if (typeof window !== 'undefined' && !listenersBound) {
+  listenersBound = true;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const handleMedia = (event: MediaQueryListEvent) => {
+    if (getStoredTheme()) return;
+    setThemeStore(event.matches ? 'dark' : 'light');
+  };
+  media.addEventListener('change', handleMedia);
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key !== STORAGE_KEY || !event.newValue) return;
+    const value = event.newValue === 'dark' ? 'dark' : 'light';
+    setThemeStore(value);
+  };
+  window.addEventListener('storage', handleStorage);
+}
+
+const subscribe = (listener: Subscriber) => {
+  subscribers.add(listener);
+  return () => subscribers.delete(listener);
+};
+
+const getSnapshot: SnapshotFn = () => themeStore;
+const getServerSnapshot: SnapshotFn = () => 'light';
 
 export function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => 'light');
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    // Inicializar desde localStorage o prefers-color-scheme
-    const stored = (typeof window !== 'undefined' && localStorage.getItem(STORAGE_KEY)) as 'light' | 'dark' | null;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.classList.toggle('dark', stored === 'dark');
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initial = prefersDark ? 'dark' : 'light';
-      setTheme(initial);
-      document.documentElement.classList.toggle('dark', initial === 'dark');
-    }
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme, mounted]);
-
-  if (!mounted) return null;
-
-  const toggle = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const toggle = () => setThemeStore(theme === 'light' ? 'dark' : 'light');
 
   return (
     <button

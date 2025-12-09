@@ -1,7 +1,7 @@
 "use client";
 
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherIcon, getWeatherInfo, icons as defaultIcons } from "@/app/weather/services/weather-utils";
+import { getWeatherIcon, getWeatherInfo } from "@/app/weather/services/weather-utils";
 
 interface Props {
   weather: WeatherData;
@@ -10,7 +10,6 @@ interface Props {
   convertTemp: (t: number | null) => number | string;
   getWeatherInfo: typeof getWeatherInfo;
   getWeatherIcon: typeof getWeatherIcon;
-  icons?: typeof defaultIcons;
 }
 
 export default function Forecast({
@@ -20,8 +19,8 @@ export default function Forecast({
   convertTemp,
   getWeatherInfo,
   getWeatherIcon,
-  icons = defaultIcons,
 }: Props) {
+
   return (
     <div className="bg-layer-1 border border-layer-3 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
