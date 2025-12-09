@@ -16,12 +16,11 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-14">
           <Link
-            href="/"
+            href="https://stackbp.es/"
             className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors group"
           >
             <icons.ArrowUpRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-1" />
             <span className="font-medium text-sm hidden sm:inline">Created by stackbp</span>
-            <span className="font-medium text-sm sm:hidden">Back</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
