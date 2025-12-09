@@ -189,7 +189,6 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
 
               {currentWeather.daily && (
                 <Forecast
-                  icons={icons}
                   weather={currentWeather}
                   forecastDays={forecastDays}
                   setForecastDays={setForecastDays}
@@ -198,6 +197,7 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
                   getWeatherIcon={getWeatherIcon}
                 />
               )}
+
             </div>
           </>
         )}
