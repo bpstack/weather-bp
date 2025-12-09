@@ -108,6 +108,27 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
 
   const currentWeather = weather;
 
+  const rainAlert = (() => {
+    if (!currentWeather?.hourly?.precipitation_probability?.length) return null;
+    const prob = currentWeather.hourly.precipitation_probability.slice(0, 3).map((p) => p ?? 0);
+    const precip = currentWeather.hourly.precipitation?.slice(0, 3).map((p) => p ?? 0) ?? [];
+
+    const maxProb = Math.max(...prob);
+    if (maxProb < 30) return null;
+
+    const maxIndex = prob.findIndex((p) => p === maxProb);
+    const amount = precip[maxIndex] ?? 0;
+
+    return { probability: maxProb, amount };
+  })();
+
+  const heatAlert = (() => {
+    const tempC = currentWeather?.current?.temperature_2m;
+    if (tempC === undefined || tempC === null) return null;
+    if (tempC < 35) return null;
+    return { tempC };
+  })();
+
   return (
     <div className="min-h-screen bg-background p-4 pt-16">
       <div className="max-w-4xl mx-auto">
@@ -133,32 +154,52 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
           </div>
         )}
 
+        {rainAlert && !isLoading && !error && (
+          <div className="bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-200 rounded-lg p-3 mb-2 flex items-center gap-2 text-xs sm:text-sm">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" aria-hidden />
+            <span className="font-semibold">Lluvia probable en próximas horas</span>
+            <span className="text-text-secondary">
+              {`Probabilidad ${Math.round(rainAlert.probability)}%, ~${rainAlert.amount.toFixed(1)} mm esperados`}
+            </span>
+          </div>
+        )}
+
         {currentWeather && !isLoading && (
-          <div className="space-y-4">
-            <CurrentWeather
-              icons={icons}
-              weather={currentWeather}
-              tempUnit={tempUnit}
-              setTempUnit={setTempUnit}
-              convertTemp={convertTemp}
-              getWeatherInfo={getWeatherInfo}
-              getWeatherIcon={getWeatherIcon}
-            />
+          <>
+            {heatAlert && !error && (
+              <div className="bg-orange-500/10 border border-orange-500/30 text-orange-800 dark:text-orange-200 rounded-lg p-3 mb-2 flex items-center gap-2 text-xs sm:text-sm">
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" aria-hidden />
+                <span className="font-semibold">Alerta de calor</span>
+                <span className="text-text-secondary">{`Temperatura actual ${Math.round(heatAlert.tempC)}°C`} (≥ 35°C)</span>
+              </div>
+            )}
 
-            <WeatherDetails icons={icons} weather={currentWeather} />
-
-            {currentWeather.daily && (
-              <Forecast
+            <div className="space-y-4">
+              <CurrentWeather
                 icons={icons}
                 weather={currentWeather}
-                forecastDays={forecastDays}
-                setForecastDays={setForecastDays}
+                tempUnit={tempUnit}
+                setTempUnit={setTempUnit}
                 convertTemp={convertTemp}
                 getWeatherInfo={getWeatherInfo}
                 getWeatherIcon={getWeatherIcon}
               />
-            )}
-          </div>
+
+              <WeatherDetails icons={icons} weather={currentWeather} />
+
+              {currentWeather.daily && (
+                <Forecast
+                  icons={icons}
+                  weather={currentWeather}
+                  forecastDays={forecastDays}
+                  setForecastDays={setForecastDays}
+                  convertTemp={convertTemp}
+                  getWeatherInfo={getWeatherInfo}
+                  getWeatherIcon={getWeatherIcon}
+                />
+              )}
+            </div>
+          </>
         )}
 
         <FooterInfo icons={icons} />
@@ -181,3 +222,4 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
     </div>
   );
 }
+

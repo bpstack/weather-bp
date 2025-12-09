@@ -51,6 +51,28 @@ export default function WeatherDetails({ weather, icons = defaultIcons }: Props)
           <span className="text-xs font-normal text-text-secondary ml-1">hPa</span>
         </div>
       </div>
+
+      <div className="group bg-layer-2 rounded-lg p-3 border border-layer-3 hover:border-accent/30 transition-all col-span-2">
+        <div className="flex items-center gap-1.5 mb-1 text-text-secondary">
+          <icons.Sun className="w-3 h-3 group-hover:text-accent transition-colors" />
+          <span className="text-xs uppercase tracking-wider">Amanecer / Atardecer</span>
+        </div>
+        <div className="flex gap-4 text-sm text-text-primary">
+          <span>{new Date(weather.daily.sunrise?.[0] ?? "").toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</span>
+          <span>{new Date(weather.daily.sunset?.[0] ?? "").toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</span>
+        </div>
+      </div>
+
+      <div className="group bg-layer-2 rounded-lg p-3 border border-layer-3 hover:border-accent/30 transition-all col-span-2">
+        <div className="flex items-center gap-1.5 mb-1 text-text-secondary">
+          <icons.Zap className="w-3 h-3 group-hover:text-accent transition-colors" />
+          <span className="text-xs uppercase tracking-wider">Índice Ultra Violeta (máx)</span>
+        </div>
+        <div className="text-xl font-bold text-text-primary">
+          {Math.round(weather.daily.uv_index_max?.[0] ?? 0)}
+        </div>
+      </div>
     </div>
   );
 }
+
