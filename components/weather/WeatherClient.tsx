@@ -31,12 +31,12 @@ interface Props {
 export default function WeatherClient({ initialCity, initialWeather }: Props) {
   const [selectedCity, setSelectedCity] = useState<GeocodingCity>(initialCity);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedContinent, setSelectedContinent] = useState<string>("Todos");
+  const [selectedContinent, setSelectedContinent] = useState<string>("En todo el mundo");
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
   const [tempUnit, setTempUnit] = useState<"C" | "F">("C");
 
-  const continents = ["Todos", "Europa", "América", "Asia", "Oceanía", "África"];
+  const continents = ["En todo el mundo", "Europa", "América", "Asia", "Oceanía", "África"];
   const popularCities = getPopularCities();
 
   const { data: weather, isLoading, error } = useSWR(

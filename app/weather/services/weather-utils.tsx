@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import {
   ArrowUpRight,
+  ChevronDown,
   Cloud,
   CloudRain,
   CloudSnow,
@@ -22,6 +23,7 @@ import {
 
 export const icons = {
   ArrowUpRight,
+  ChevronDown,
   Cloud,
   CloudRain,
   CloudSnow,
