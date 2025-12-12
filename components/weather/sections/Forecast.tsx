@@ -80,8 +80,8 @@ export default function Forecast({
                   {getWeatherInfo(weather.daily.weather_code[i]).text}
                 </span>
                 <div className="flex gap-3 text-sm">
-                   <span className="font-bold text-text-primary">{convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°</span>
-                   <span className="text-text-secondary">{convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°</span>
+                  <span className="font-bold text-text-primary">{convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°</span>
+                  <span className="text-text-secondary">{convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°</span>
 
                 </div>
               </div>
