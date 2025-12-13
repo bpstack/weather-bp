@@ -20,7 +20,7 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
             className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors group"
           >
             <icons.ArrowUpRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-1" />
-            <span className="font-medium text-sm hidden sm:inline">Created by stackbp</span>
+            <span className="font-medium text-[10px] sm:text-sm">Created by stackbp</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">

@@ -36,12 +36,8 @@ export default function FooterInfo({ icons = defaultIcons }: Props) {
           <icons.ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </a>
 
-        <div className="flex items-center justify-center gap-3 text-xs text-text-secondary/70">
-          <span>Next.js 16</span>
-          <span>•</span>
-          <span>TypeScript</span>
-          <span>•</span>
-          <span>Tailwind CSS</span>
+        <div className="flex items-center justify-center gap-3 text-[11px] text-text-secondary/70 italic">
+          <span>Desarrollado por Bori</span>
         </div>
       </div>
     </div>
