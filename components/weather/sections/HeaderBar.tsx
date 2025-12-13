@@ -23,10 +23,13 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
             <span className="font-medium text-[10px] sm:text-sm">Created by stackbp</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
-            <h1 className="text-base font-bold text-text-primary">☁️ Weather App</h1>
+          <div className="flex items-center gap-1.5 sm:gap-2 absolute left-1/2 -translate-x-1/2">
+            <h1 className="text-xs sm:text-base font-bold text-text-primary">
+              <span className="sm:hidden">☁️</span>
+              <span className="hidden sm:inline">☁️ Weather App</span>
+            </h1>
             {weather && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs">
+              <span className="flex items-center gap-1 px-1 sm:px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] sm:text-xs">
                 <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
                 Live
               </span>
