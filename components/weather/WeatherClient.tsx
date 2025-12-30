@@ -1,17 +1,28 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import useSWR from "swr";
-import { WeatherData, fetchWeather } from "@/app/weather/services/weather-service";
-import { GeocodingCity, getContinent, getPopularCities } from "@/app/weather/services/city-utils";
-import { getWeatherIcon, getWeatherInfo, icons } from "@/app/weather/services/weather-utils";
+import { fetchWeather } from "@/app/weather/services/weather-service";
+import {
+  GeocodingCity,
+  getContinent,
+  getPopularCities,
+  getUserLocation,
+} from "@/app/weather/services/city-utils";
+import {
+  getWeatherIcon,
+  getWeatherInfo,
+  icons,
+} from "@/app/weather/services/weather-utils";
 import CurrentWeather from "./sections/CurrentWeather";
 import WeatherDetails from "./sections/WeatherDetails";
 import Forecast from "./sections/Forecast";
+import HourlyForecast from "./sections/HourlyForecast";
 import CitySelector from "./sections/CitySelector";
 import HeaderBar from "./sections/HeaderBar";
 import FooterInfo from "./sections/FooterInfo";
 import CityModal from "./sections/CityModal";
+import WeatherAlerts from "./sections/WeatherAlerts";
 
 const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
   return fetchWeather({
@@ -23,27 +34,65 @@ const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
   });
 };
 
-interface Props {
-  initialCity: GeocodingCity;
-  initialWeather: WeatherData;
-}
-
-export default function WeatherClient({ initialCity, initialWeather }: Props) {
-  const [selectedCity, setSelectedCity] = useState<GeocodingCity>(initialCity);
+export default function WeatherClient() {
+  const [selectedCity, setSelectedCity] = useState<GeocodingCity | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedContinent, setSelectedContinent] = useState<string>("En todo el mundo");
+  const [selectedContinent, setSelectedContinent] =
+    useState<string>("En todo el mundo");
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
   const [tempUnit, setTempUnit] = useState<"C" | "F">("C");
 
-  const continents = ["En todo el mundo", "Europa", "América", "Asia", "Oceanía", "África"];
+  const continents = [
+    "En todo el mundo",
+    "Europa",
+    "América",
+    "Asia",
+    "Oceanía",
+    "África",
+  ];
   const popularCities = getPopularCities();
 
-  const { data: weather, isLoading, error } = useSWR(
-    ["weather", selectedCity.id, forecastDays],
-    () => fetcher("weather", selectedCity, forecastDays),
+  // Function to request geolocation
+  const requestGeolocation = useCallback(async () => {
+    setIsLocating(true);
+    setLocationError(null);
+
+    const result = await getUserLocation();
+
+    if (result.city) {
+      setSelectedCity(result.city);
+      setLocationError(null);
+    } else if (result.error) {
+      setLocationError(result.error);
+    }
+
+    setIsLocating(false);
+    return result;
+  }, []);
+
+  // Auto-detect location on mount
+  useEffect(() => {
+    const detectLocation = async () => {
+      await requestGeolocation();
+      setIsInitializing(false);
+    };
+
+    detectLocation();
+  }, [requestGeolocation]);
+
+  const {
+    data: weather,
+    isLoading,
+    error,
+  } = useSWR(
+    selectedCity ? ["weather", selectedCity.id, forecastDays] : null,
+    () =>
+      selectedCity ? fetcher("weather", selectedCity, forecastDays) : null,
     {
-      fallbackData: initialCity.id === selectedCity.id && forecastDays === 7 ? initialWeather : undefined,
       revalidateOnFocus: false,
     },
   );
@@ -51,9 +100,9 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
   const [filteredSearch, setFilteredSearch] = useState<GeocodingCity[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  // Búsqueda con debounce simple
+  // Search with debounce - triggers at 3+ characters
   useEffect(() => {
-    if (searchQuery.length < 2) {
+    if (searchQuery.length < 3) {
       setFilteredSearch([]);
       setSearchLoading(false);
       return;
@@ -79,7 +128,7 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
       } finally {
         setSearchLoading(false);
       }
-    }, 500);
+    }, 300);
     return () => {
       controller.abort();
       clearTimeout(timer);
@@ -87,18 +136,20 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
   }, [searchQuery]);
 
   const filteredCities = useMemo(() => {
-    const base = searchQuery.length >= 2 ? filteredSearch : popularCities;
-    if (selectedContinent === "Todos") return base;
+    // If searching, use search results; otherwise show popular cities
+    const base = searchQuery.length >= 3 ? filteredSearch : popularCities;
+
+    if (selectedContinent === "En todo el mundo") return base;
     return base.filter((city) => city.continent === selectedContinent);
   }, [searchQuery, filteredSearch, popularCities, selectedContinent]);
 
-  const handleCitySelect = (city: GeocodingCity) => {
+  const handleCitySelect = useCallback((city: GeocodingCity) => {
     setSelectedCity(city);
     setShowCitySelector(false);
     setSearchQuery("");
     setFilteredSearch([]);
-    setSelectedContinent("Todos");
-  };
+    setSelectedContinent("En todo el mundo");
+  }, []);
 
   const convertTemp = (temp: number | null) => {
     if (temp === null || temp === undefined) return "-";
@@ -108,26 +159,92 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
 
   const currentWeather = weather;
 
-  const rainAlert = (() => {
-    if (!currentWeather?.hourly?.precipitation_probability?.length) return null;
-    const prob = currentWeather.hourly.precipitation_probability.slice(0, 3).map((p) => p ?? 0);
-    const precip = currentWeather.hourly.precipitation?.slice(0, 3).map((p) => p ?? 0) ?? [];
+  // Initial loading state
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-background p-4 pt-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col items-center justify-center gap-3 py-24">
+            <icons.Loader2 className="w-8 h-8 animate-spin text-accent" />
+            <span className="text-sm text-text-secondary">
+              Detectando ubicación...
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-    const maxProb = Math.max(...prob);
-    if (maxProb < 30) return null;
+  // No city selected state (geolocation failed/denied)
+  if (!selectedCity) {
+    return (
+      <div className="min-h-screen bg-background p-4 pt-16">
+        <div className="max-w-4xl mx-auto">
+          <HeaderBar weather={null} icons={icons} />
 
-    const maxIndex = prob.findIndex((p) => p === maxProb);
-    const amount = precip[maxIndex] ?? 0;
+          <div className="bg-layer-1 border border-layer-3 rounded-lg p-6 mb-4 text-center">
+            <icons.MapPin className="w-12 h-12 mx-auto mb-4 text-text-secondary" />
+            <h2 className="text-lg font-semibold text-text-primary mb-2">
+              Selecciona una ubicación
+            </h2>
+            <p className="text-sm text-text-secondary mb-4">
+              No pudimos detectar tu ubicación automáticamente. Puedes
+              intentarlo de nuevo o buscar una ciudad manualmente.
+            </p>
 
-    return { probability: maxProb, amount };
-  })();
+            {locationError && (
+              <div className="mb-4 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-md px-3 py-2">
+                {locationError}
+              </div>
+            )}
 
-  const heatAlert = (() => {
-    const tempC = currentWeather?.current?.temperature_2m;
-    if (tempC === undefined || tempC === null) return null;
-    if (tempC < 35) return null;
-    return { tempC };
-  })();
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={requestGeolocation}
+                disabled={isLocating}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-layer-2 border border-layer-3 text-text-primary hover:border-accent/30 hover:text-accent transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isLocating ? (
+                  <>
+                    <icons.Loader2 className="w-4 h-4 animate-spin" />
+                    Detectando...
+                  </>
+                ) : (
+                  <>
+                    <icons.Navigation className="w-4 h-4" />
+                    Usar mi ubicación
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setShowCitySelector(true)}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-accent text-white hover:bg-accent-hover transition-all font-medium text-sm shadow-sm hover:shadow-md"
+              >
+                Buscar ciudad
+              </button>
+            </div>
+          </div>
+
+          <FooterInfo icons={icons} />
+        </div>
+
+        {showCitySelector && (
+          <CityModal
+            icons={icons}
+            filteredCities={filteredCities}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchLoading={searchLoading}
+            continents={continents}
+            selectedContinent={selectedContinent}
+            setSelectedContinent={setSelectedContinent}
+            handleCitySelect={handleCitySelect}
+            setShowCitySelector={setShowCitySelector}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 pt-16">
@@ -139,40 +256,27 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
           weather={currentWeather}
           selectedCity={selectedCity}
           setShowCitySelector={setShowCitySelector}
+          onCitySelect={handleCitySelect}
         />
 
         {isLoading && (
           <div className="flex flex-col items-center justify-center gap-3 py-12">
             <icons.Loader2 className="w-6 h-6 animate-spin text-accent" />
-            <span className="text-sm text-text-secondary">Cargando datos...</span>
+            <span className="text-sm text-text-secondary">
+              Cargando datos...
+            </span>
           </div>
         )}
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4 text-sm text-red-600 dark:text-red-400">
-            ⚠️ No se pudieron obtener los datos del tiempo
+            No se pudieron obtener los datos del tiempo
           </div>
         )}
 
-        {rainAlert && !isLoading && !error && (
-          <div className="bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-200 rounded-lg p-3 mb-2 flex items-center gap-2 text-xs sm:text-sm">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" aria-hidden />
-            <span className="font-semibold">Lluvia probable en próximas horas</span>
-            <span className="text-text-secondary">
-              {`Probabilidad ${Math.round(rainAlert.probability)}%, ~${rainAlert.amount.toFixed(1)} mm esperados`}
-            </span>
-          </div>
-        )}
-
-        {currentWeather && !isLoading && (
+        {currentWeather && !isLoading && !error && (
           <>
-            {heatAlert && !error && (
-              <div className="bg-orange-500/10 border border-orange-500/30 text-orange-800 dark:text-orange-200 rounded-lg p-3 mb-2 flex items-center gap-2 text-xs sm:text-sm">
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" aria-hidden />
-                <span className="font-semibold">Alerta de calor</span>
-                <span className="text-text-secondary">{`Temperatura actual ${Math.round(heatAlert.tempC)}°C`} (≥ 35°C)</span>
-              </div>
-            )}
+            <WeatherAlerts weather={currentWeather} />
 
             <div className="space-y-4">
               <CurrentWeather
@@ -183,6 +287,12 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
                 convertTemp={convertTemp}
                 getWeatherInfo={getWeatherInfo}
                 getWeatherIcon={getWeatherIcon}
+              />
+
+              <HourlyForecast
+                weather={currentWeather}
+                convertTemp={convertTemp}
+                tempUnit={tempUnit}
               />
 
               <WeatherDetails icons={icons} weather={currentWeather} />
@@ -197,7 +307,6 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
                   getWeatherIcon={getWeatherIcon}
                 />
               )}
-
             </div>
           </>
         )}
@@ -222,4 +331,3 @@ export default function WeatherClient({ initialCity, initialWeather }: Props) {
     </div>
   );
 }
-

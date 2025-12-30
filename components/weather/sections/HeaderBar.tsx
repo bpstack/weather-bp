@@ -4,15 +4,17 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
+import Santa from "@/components/ui/Santa";
 
 interface HeaderProps {
-  weather?: WeatherData;
+  weather?: WeatherData | null;
   icons?: typeof defaultIcons;
 }
 
 function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-layer-3">
+      <Santa />
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-14">
           <Link
@@ -20,7 +22,9 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
             className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors group"
           >
             <icons.ArrowUpRight className="w-4 h-4 rotate-180 transition-transform group-hover:-translate-x-1" />
-            <span className="font-medium text-[10px] sm:text-sm">Created by stackbp</span>
+            <span className="font-medium text-[10px] sm:text-sm">
+              Created by stackbp
+            </span>
           </Link>
 
           <div className="flex items-center gap-1.5 sm:gap-2 absolute left-1/2 -translate-x-1/2">

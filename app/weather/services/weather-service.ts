@@ -28,7 +28,6 @@ const weatherSchema = z.object({
   }),
 });
 
-
 export type WeatherData = z.infer<typeof weatherSchema> & {
   cityName: string;
   country: string;
@@ -42,8 +41,10 @@ interface FetchWeatherArgs {
   days?: 16 | 7;
 }
 
-const fillNulls = (value: number | null | undefined, fallback: number | null = null) =>
-  value === null || value === undefined ? fallback : value;
+const fillNulls = (
+  value: number | null | undefined,
+  fallback: number | null = null,
+) => (value === null || value === undefined ? fallback : value);
 
 const BASE_URL = "https://api.open-meteo.com/v1/forecast";
 
@@ -56,30 +57,41 @@ export async function fetchWeather({
 }: FetchWeatherArgs): Promise<WeatherData> {
   const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,uv_index_max&forecast_days=${days}&timezone=auto`;
 
-
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url);
   if (!res.ok) {
     throw new Error("No se pudieron obtener los datos del tiempo");
   }
 
   const json = await res.json();
 
-  const normalizeDaily = (arr: Array<number | null> | undefined, fill: number | null = null) => {
+  const normalizeDaily = (
+    arr: Array<number | null> | undefined,
+    fill: number | null = null,
+  ) => {
     if (!Array.isArray(arr)) return [] as Array<number | null>;
     return arr.map((v) => (v === null ? fill : v));
   };
 
-  const normalizeHourlyNumbers = (arr: Array<number | null> | undefined, fill = 0) => {
+  const normalizeHourlyNumbers = (
+    arr: Array<number | null> | undefined,
+    fill = 0,
+  ) => {
     if (!Array.isArray(arr)) return [] as number[];
     return arr.map((v) => (v === null || v === undefined ? fill : v));
   };
 
-  const normalizeHourlyProbability = (arr: Array<number | null> | undefined, fill = 0) => {
+  const normalizeHourlyProbability = (
+    arr: Array<number | null> | undefined,
+    fill = 0,
+  ) => {
     if (!Array.isArray(arr)) return [] as number[];
     return arr.map((v) => (v === null || v === undefined ? fill : v));
   };
 
-  const normalizeHourlyPrecip = (arr: Array<number | null> | undefined, fill = 0) => {
+  const normalizeHourlyPrecip = (
+    arr: Array<number | null> | undefined,
+    fill = 0,
+  ) => {
     if (!Array.isArray(arr)) return [] as number[];
     return arr.map((v) => (v === null || v === undefined ? fill : v));
   };
@@ -89,21 +101,30 @@ export async function fetchWeather({
     hourly: {
       ...json.hourly,
       temperature_2m: normalizeHourlyNumbers(json.hourly?.temperature_2m),
-      relative_humidity_2m: normalizeHourlyNumbers(json.hourly?.relative_humidity_2m),
-      precipitation_probability: normalizeHourlyProbability(json.hourly?.precipitation_probability),
+      relative_humidity_2m: normalizeHourlyNumbers(
+        json.hourly?.relative_humidity_2m,
+      ),
+      precipitation_probability: normalizeHourlyProbability(
+        json.hourly?.precipitation_probability,
+      ),
       precipitation: normalizeHourlyPrecip(json.hourly?.precipitation),
     },
     daily: {
       ...json.daily,
-      temperature_2m_max: normalizeDaily(json.daily?.temperature_2m_max).map((v) => fillNulls(v)),
-      temperature_2m_min: normalizeDaily(json.daily?.temperature_2m_min).map((v) => fillNulls(v)),
-      weather_code: normalizeDaily(json.daily?.weather_code).map((v) => fillNulls(v)),
+      temperature_2m_max: normalizeDaily(json.daily?.temperature_2m_max).map(
+        (v) => fillNulls(v),
+      ),
+      temperature_2m_min: normalizeDaily(json.daily?.temperature_2m_min).map(
+        (v) => fillNulls(v),
+      ),
+      weather_code: normalizeDaily(json.daily?.weather_code).map((v) =>
+        fillNulls(v),
+      ),
       sunrise: json.daily?.sunrise ?? [],
       sunset: json.daily?.sunset ?? [],
       uv_index_max: normalizeDaily(json.daily?.uv_index_max),
     },
   };
-
 
   const parsed = weatherSchema.parse(safeJson);
 

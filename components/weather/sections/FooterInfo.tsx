@@ -32,7 +32,9 @@ export default function FooterInfo({ icons = defaultIcons }: Props) {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-layer-1 to-layer-2 border border-layer-3 text-text-secondary hover:text-accent hover:border-accent/50 transition-all group shadow-sm hover:shadow-md"
         >
           <icons.Info className="h-3.5 w-3.5" />
-          <span className="text-xs font-medium">Cómo se construyó esta app</span>
+          <span className="text-xs font-medium">
+            Cómo se construyó esta app
+          </span>
           <icons.ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </a>
 

@@ -1,29 +1,31 @@
-'use client';
+"use client";
 
-import { useSyncExternalStore } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { useSyncExternalStore } from "react";
+import { Moon, Sun } from "lucide-react";
 
-const STORAGE_KEY = 'weather-bp-theme';
-type Theme = 'light' | 'dark';
+const STORAGE_KEY = "weather-bp-theme";
+type Theme = "light" | "dark";
 
 type SnapshotFn = () => Theme;
 
 type Subscriber = () => void;
 
 const getStoredTheme = (): Theme | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === 'light' || stored === 'dark' ? stored : null;
+  return stored === "light" || stored === "dark" ? stored : null;
 };
 
 const getPreferredTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 };
 
 const applyTheme = (theme: Theme) => {
-  if (typeof document === 'undefined') return;
-  document.documentElement.classList.toggle('dark', theme === 'dark');
+  if (typeof document === "undefined") return;
+  document.documentElement.classList.toggle("dark", theme === "dark");
 };
 
 let themeStore: Theme = getStoredTheme() ?? getPreferredTheme();
@@ -38,7 +40,7 @@ const setThemeStore = (nextTheme: Theme) => {
   if (themeStore === nextTheme) return;
   themeStore = nextTheme;
   applyTheme(nextTheme);
-  if (typeof localStorage !== 'undefined') {
+  if (typeof localStorage !== "undefined") {
     localStorage.setItem(STORAGE_KEY, nextTheme);
   }
   notify();
@@ -46,21 +48,21 @@ const setThemeStore = (nextTheme: Theme) => {
 
 applyTheme(themeStore);
 
-if (typeof window !== 'undefined' && !listenersBound) {
+if (typeof window !== "undefined" && !listenersBound) {
   listenersBound = true;
-  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
   const handleMedia = (event: MediaQueryListEvent) => {
     if (getStoredTheme()) return;
-    setThemeStore(event.matches ? 'dark' : 'light');
+    setThemeStore(event.matches ? "dark" : "light");
   };
-  media.addEventListener('change', handleMedia);
+  media.addEventListener("change", handleMedia);
 
   const handleStorage = (event: StorageEvent) => {
     if (event.key !== STORAGE_KEY || !event.newValue) return;
-    const value = event.newValue === 'dark' ? 'dark' : 'light';
+    const value = event.newValue === "dark" ? "dark" : "light";
     setThemeStore(value);
   };
-  window.addEventListener('storage', handleStorage);
+  window.addEventListener("storage", handleStorage);
 }
 
 const subscribe = (listener: Subscriber) => {
@@ -69,12 +71,12 @@ const subscribe = (listener: Subscriber) => {
 };
 
 const getSnapshot: SnapshotFn = () => themeStore;
-const getServerSnapshot: SnapshotFn = () => 'light';
+const getServerSnapshot: SnapshotFn = () => "light";
 
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const toggle = () => setThemeStore(theme === 'light' ? 'dark' : 'light');
+  const toggle = () => setThemeStore(theme === "light" ? "dark" : "light");
 
   return (
     <button
@@ -83,7 +85,11 @@ export function ThemeToggle() {
       className="p-2 rounded-lg border border-layer-3 bg-layer-1 text-text-secondary hover:text-text-primary hover:border-accent/50 hover:bg-layer-2 transition-colors"
       aria-label="Cambiar tema"
     >
-      {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      {theme === "dark" ? (
+        <Sun className="w-4 h-4" />
+      ) : (
+        <Moon className="w-4 h-4" />
+      )}
     </button>
   );
 }

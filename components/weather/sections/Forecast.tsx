@@ -1,7 +1,10 @@
 "use client";
 
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherIcon, getWeatherInfo } from "@/app/weather/services/weather-utils";
+import {
+  getWeatherIcon,
+  getWeatherInfo,
+} from "@/app/weather/services/weather-utils";
 
 interface Props {
   weather: WeatherData;
@@ -20,7 +23,6 @@ export default function Forecast({
   getWeatherInfo,
   getWeatherIcon,
 }: Props) {
-
   return (
     <div className="bg-layer-1 border border-layer-3 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
@@ -29,7 +31,9 @@ export default function Forecast({
           <button
             onClick={() => setForecastDays(7)}
             className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
-              forecastDays === 7 ? "bg-accent text-white" : "bg-layer-2 text-text-secondary hover:bg-layer-3"
+              forecastDays === 7
+                ? "bg-accent text-white"
+                : "bg-layer-2 text-text-secondary hover:bg-layer-3"
             }`}
           >
             7 días
@@ -37,7 +41,9 @@ export default function Forecast({
           <button
             onClick={() => setForecastDays(16)}
             className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
-              forecastDays === 16 ? "bg-accent text-white" : "bg-layer-2 text-text-secondary hover:bg-layer-3"
+              forecastDays === 16
+                ? "bg-accent text-white"
+                : "bg-layer-2 text-text-secondary hover:bg-layer-3"
             }`}
           >
             16 días
@@ -52,7 +58,9 @@ export default function Forecast({
             <div
               key={date}
               className={`flex items-center justify-between p-3 rounded-lg transition-all border ${
-                isToday ? "bg-accent/5 border-accent/20 dark:bg-accent/10" : "hover:bg-layer-2 border-transparent hover:border-layer-3"
+                isToday
+                  ? "bg-accent/5 border-accent/20 dark:bg-accent/10"
+                  : "hover:bg-layer-2 border-transparent hover:border-layer-3"
               }`}
             >
               <div className="flex items-center gap-3 flex-1">
@@ -80,9 +88,12 @@ export default function Forecast({
                   {getWeatherInfo(weather.daily.weather_code[i]).text}
                 </span>
                 <div className="flex gap-3 text-sm">
-                  <span className="font-bold text-text-primary">{convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°</span>
-                  <span className="text-text-secondary">{convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°</span>
-
+                  <span className="font-bold text-text-primary">
+                    {convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°
+                  </span>
+                  <span className="text-text-secondary">
+                    {convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°
+                  </span>
                 </div>
               </div>
             </div>
