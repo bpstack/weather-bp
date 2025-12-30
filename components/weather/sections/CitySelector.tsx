@@ -7,6 +7,7 @@ import {
   GeocodingCity,
   getUserLocation,
 } from "@/app/weather/services/city-utils";
+import Santa from "@/components/ui/Santa";
 
 interface Props {
   icons?: typeof defaultIcons;
@@ -53,6 +54,8 @@ export default function CitySelector({
           } opacity-10 dark:opacity-5`}
         />
       )}
+
+      <Santa />
 
       <div className="relative flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">

@@ -29,6 +29,7 @@ export default function Santa() {
   const [isDragging, setIsDragging] = useState(false);
   const santaRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef(0);
+  const containerRef = useRef<HTMLElement | null>(null);
 
   // Save position to localStorage
   const savePosition = useCallback((percent: number) => {
@@ -41,6 +42,7 @@ export default function Santa() {
     if (santaRef.current) {
       const rect = santaRef.current.getBoundingClientRect();
       dragOffset.current = e.clientX - rect.left;
+      containerRef.current = santaRef.current.parentElement;
     }
   };
 
@@ -49,6 +51,7 @@ export default function Santa() {
     if (santaRef.current) {
       const rect = santaRef.current.getBoundingClientRect();
       dragOffset.current = e.touches[0].clientX - rect.left;
+      containerRef.current = santaRef.current.parentElement;
     }
   };
 
@@ -56,19 +59,28 @@ export default function Santa() {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newX = e.clientX - dragOffset.current;
+      const container = containerRef.current;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const newX = e.clientX - dragOffset.current - containerRect.left;
       const percent = Math.max(
         0,
-        Math.min((newX / window.innerWidth) * 100, 95),
+        Math.min((newX / containerRect.width) * 100, 92),
       );
       setPositionPercent(percent);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      const newX = e.touches[0].clientX - dragOffset.current;
+      const container = containerRef.current;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const newX =
+        e.touches[0].clientX - dragOffset.current - containerRect.left;
       const percent = Math.max(
         0,
-        Math.min((newX / window.innerWidth) * 100, 95),
+        Math.min((newX / containerRect.width) * 100, 92),
       );
       setPositionPercent(percent);
     };
