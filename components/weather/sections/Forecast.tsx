@@ -54,6 +54,7 @@ export default function Forecast({
       <div className="space-y-2">
         {weather.daily.time.slice(0, forecastDays).map((date, i) => {
           const isToday = i === 0;
+          const weatherInfo = getWeatherInfo(weather.daily.weather_code[i]);
           return (
             <div
               key={date}
@@ -63,10 +64,12 @@ export default function Forecast({
                   : "hover:bg-layer-2 border-transparent hover:border-layer-3"
               }`}
             >
-              <div className="flex items-center gap-3 flex-1">
-                {getWeatherIcon(weather.daily.weather_code[i] ?? null, "sm")}
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex-shrink-0">
+                  {getWeatherIcon(weather.daily.weather_code[i] ?? null, "sm")}
+                </div>
 
-                <div>
+                <div className="flex-1 min-w-0">
                   <span className="font-medium text-text-primary text-sm block">
                     {isToday
                       ? "Hoy"
@@ -74,27 +77,35 @@ export default function Forecast({
                           weekday: "long",
                         })}
                   </span>
-                  <span className="text-xs text-text-secondary">
+                  <span className="text-xs text-text-secondary block sm:hidden">
+                    {new Date(date).toLocaleDateString("es-ES", {
+                      day: "numeric",
+                      month: "short",
+                    })}{" "}
+                    • <span className={weatherInfo.color}>{weatherInfo.text}</span>
+                  </span>
+                  <span className="text-xs text-text-secondary hidden sm:block">
                     {new Date(date).toLocaleDateString("es-ES", {
                       day: "numeric",
                       month: "short",
                     })}
                   </span>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-text-secondary hidden md:block">
-                  {getWeatherInfo(weather.daily.weather_code[i]).text}
-                </span>
-                <div className="flex gap-3 text-sm">
-                  <span className="font-bold text-text-primary">
-                    {convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°
-                  </span>
-                  <span className="text-text-secondary">
-                    {convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°
+                <div className="hidden sm:block flex-shrink-0">
+                  <span className={`text-xs font-medium ${weatherInfo.color}`}>
+                    {weatherInfo.text}
                   </span>
                 </div>
+              </div>
+
+              <div className="flex gap-3 text-sm flex-shrink-0 ml-3">
+                <span className="font-bold text-text-primary">
+                  {convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°
+                </span>
+                <span className="text-text-secondary">
+                  {convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°
+                </span>
               </div>
             </div>
           );
