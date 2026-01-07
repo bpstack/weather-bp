@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
-import WiseMen from "@/components/ui/WiseMen";
 
 interface HeaderProps {
   weather?: WeatherData | null;
@@ -14,7 +13,6 @@ interface HeaderProps {
 function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-layer-3">
-      <WiseMen />
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center h-14">
           <Link
