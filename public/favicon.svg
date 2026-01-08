@@ -1,5 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Weather icon">
-  <circle cx="22" cy="22" r="10" stroke="#0EA5E9" stroke-width="3"/>
+  <!-- Sun rays uniformly distributed -->
+  <line x1="22" y1="5" x2="22" y2="9" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="5" y1="22" x2="9" y2="22" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="9.9" y1="9.9" x2="13" y2="13" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="31" y1="13" x2="34.1" y2="9.9" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Sun circle -->
+  <circle cx="22" cy="22" r="10" stroke="#FBBF24" stroke-width="3" fill="#FDE68A"/>
+
+  <!-- Clouds -->
   <path d="M35 46h12a8 8 0 0 0 0-16 12 12 0 0 0-23.5-3" stroke="#0EA5E9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M16 46h19" stroke="#0EA5E9" stroke-width="3" stroke-linecap="round"/>
 </svg>

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
+import UpdateNotification from "./components/UpdateNotification";
+import InstallPrompt from "./components/InstallPrompt";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,6 +52,9 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
+        <ServiceWorkerRegister />
+        <UpdateNotification />
+        <InstallPrompt />
       </body>
     </html>
   );
