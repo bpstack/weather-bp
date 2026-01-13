@@ -7,27 +7,39 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const STORAGE_KEY_HIDDEN = "weather-bp-install-prompt-hidden";
+const STORAGE_KEY_IOS_SHOWN = "weather-bp-ios-instructions-shown";
+
+function isAppInstalled(): boolean {
+  if (typeof window === "undefined") return false;
+  if (window.matchMedia("(display-mode: standalone)").matches) return true;
+  if (window.navigator.standalone === true) return true;
+  return false;
+}
+
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const isInstalled =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true;
-    return !isInstalled;
-  });
   const [isIOS] = useState(() => {
     if (typeof window === "undefined") return false;
     const userAgent = window.navigator.userAgent.toLowerCase();
     return /iphone|ipad|ipod/.test(userAgent) && !window.MSStream;
+  });
+  const [showPrompt, setShowPrompt] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (isAppInstalled()) return false;
+    if (localStorage.getItem(STORAGE_KEY_HIDDEN)) return false;
+    if (isIOS && localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) return false;
+    return true;
   });
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   useEffect(() => {
     if (isIOS) {
       const timer = setTimeout(() => {
-        setShowPrompt(true);
+        if (!localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) {
+          setShowPrompt(true);
+        }
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -41,19 +53,15 @@ export default function InstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt,
-      );
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
   }, [isIOS]);
 
   const handleInstallClick = async () => {
     if (isIOS) {
-      // En iOS, mostrar instrucciones
       setShowIOSInstructions(true);
+      localStorage.setItem(STORAGE_KEY_IOS_SHOWN, "true");
     } else if (deferredPrompt) {
-      // En otros navegadores, mostrar el prompt nativo
       deferredPrompt.prompt();
 
       const { outcome } = await deferredPrompt.userChoice;
@@ -72,6 +80,7 @@ export default function InstallPrompt() {
   const handleClose = () => {
     setShowPrompt(false);
     setShowIOSInstructions(false);
+    localStorage.setItem(STORAGE_KEY_HIDDEN, "true");
   };
 
   if (!showPrompt) return null;
