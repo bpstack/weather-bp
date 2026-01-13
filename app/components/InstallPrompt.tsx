@@ -10,54 +10,43 @@ interface BeforeInstallPromptEvent extends Event {
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const isInstalled =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+    return !isInstalled;
+  });
+  const [isIOS] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    return /iphone|ipad|ipod/.test(userAgent) && !window.MSStream;
+  });
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   useEffect(() => {
-    // Detectar iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIOSDevice =
-      /iphone|ipad|ipod/.test(userAgent) &&
-      !(window as any).MSStream;
-
-    setIsIOS(isIOSDevice);
-
-    // Verificar si ya está instalada
-    const isInstalled =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true;
-
-    if (isInstalled) {
-      setShowPrompt(false);
-      return;
-    }
-
-    // Para dispositivos no iOS, capturar el evento beforeinstallprompt
-    if (!isIOSDevice) {
-      const handleBeforeInstallPrompt = (e: Event) => {
-        e.preventDefault();
-        setDeferredPrompt(e as BeforeInstallPromptEvent);
-        setShowPrompt(true);
-      };
-
-      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-      return () => {
-        window.removeEventListener(
-          "beforeinstallprompt",
-          handleBeforeInstallPrompt,
-        );
-      };
-    } else {
-      // En iOS, mostrar el botón después de un tiempo
+    if (isIOS) {
       const timer = setTimeout(() => {
         setShowPrompt(true);
       }, 3000);
-
       return () => clearTimeout(timer);
     }
-  }, []);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setShowPrompt(true);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+    };
+  }, [isIOS]);
 
   const handleInstallClick = async () => {
     if (isIOS) {
@@ -145,7 +134,11 @@ export default function InstallPrompt() {
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-6 h-6"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -187,7 +180,9 @@ export default function InstallPrompt() {
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xs font-semibold">
                     3
                   </span>
-                  <span>Toca &quot;Añadir&quot; en la esquina superior derecha</span>
+                  <span>
+                    Toca &quot;Añadir&quot; en la esquina superior derecha
+                  </span>
                 </li>
               </ol>
             </div>
