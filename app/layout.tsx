@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import UpdateNotification from "./components/UpdateNotification";
 import InstallPrompt from "./components/InstallPrompt";
@@ -52,6 +53,18 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-FND85JTFN4"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-FND85JTFN4');
+          `}
+        </Script>
         <ServiceWorkerRegister />
         <UpdateNotification />
         <InstallPrompt />
