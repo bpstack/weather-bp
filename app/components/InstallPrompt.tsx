@@ -88,34 +88,36 @@ export default function InstallPrompt() {
   return (
     <>
       {/* Botón flotante */}
-      <button
-        onClick={handleInstallClick}
-        className="fixed bottom-6 left-6 z-50 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-full shadow-2xl hover:shadow-indigo-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2 font-medium text-sm group"
-        aria-label="Instalar aplicación"
-      >
-        <svg
-          className="w-5 h-5 group-hover:rotate-12 transition-transform"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <div className="fixed bottom-6 left-6 z-50">
+        <button
+          onClick={handleInstallClick}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-full shadow-2xl hover:shadow-indigo-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2 font-medium text-sm group"
+          aria-label="Instalar aplicación"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
-          />
-        </svg>
-        <span>Instalar App</span>
+          <svg
+            className="w-5 h-5 group-hover:rotate-12 transition-transform"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+            />
+          </svg>
+          <span>Instalar App</span>
+        </button>
         <button
           onClick={(e) => {
             e.stopPropagation();
             handleClose();
           }}
-          className="ml-1 hover:bg-white/20 rounded-full p-1 transition-colors"
+          className="absolute -top-2 -right-2 ml-1 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 rounded-full p-1 transition-colors shadow-md"
           aria-label="Cerrar"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -123,7 +125,7 @@ export default function InstallPrompt() {
             />
           </svg>
         </button>
-      </button>
+      </div>
 
       {/* Modal de instrucciones para iOS */}
       {showIOSInstructions && (
