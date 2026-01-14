@@ -23,6 +23,7 @@ import HeaderBar from "./sections/HeaderBar";
 import FooterInfo from "./sections/FooterInfo";
 import CityModal from "./sections/CityModal";
 import WeatherAlerts from "./sections/WeatherAlerts";
+import { WeatherSkeleton, InitialSkeleton } from "./Skeletons";
 
 const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
   return fetchWeather({
@@ -159,17 +160,12 @@ export default function WeatherClient() {
 
   const currentWeather = weather;
 
-  // Initial loading state
+  // Initial loading state - reserve space to prevent layout shift
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-background p-4 pt-16">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col items-center justify-center gap-3 py-24">
-            <icons.Loader2 className="w-8 h-8 animate-spin text-accent" />
-            <span className="text-sm text-text-secondary">
-              Detectando ubicación...
-            </span>
-          </div>
+          <InitialSkeleton />
         </div>
       </div>
     );
@@ -260,12 +256,7 @@ export default function WeatherClient() {
         />
 
         {isLoading && (
-          <div className="flex flex-col items-center justify-center gap-3 py-12">
-            <icons.Loader2 className="w-6 h-6 animate-spin text-accent" />
-            <span className="text-sm text-text-secondary">
-              Cargando datos...
-            </span>
-          </div>
+          <WeatherSkeleton />
         )}
 
         {error && (

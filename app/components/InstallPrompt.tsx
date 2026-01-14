@@ -13,36 +13,39 @@ const STORAGE_KEY_IOS_SHOWN = "weather-bp-ios-instructions-shown";
 function isAppInstalled(): boolean {
   if (typeof window === "undefined") return false;
   if (window.matchMedia("(display-mode: standalone)").matches) return true;
-  if (window.navigator.standalone === true) return true;
+  if ((window.navigator as any).standalone === true) return true;
   return false;
 }
 
 export default function InstallPrompt() {
+  // Estado inicial siempre false para SSR
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isIOS] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    return /iphone|ipad|ipod/.test(userAgent) && !window.MSStream;
-  });
-  const [showPrompt, setShowPrompt] = useState(() => {
-    if (typeof window === "undefined") return false;
-    if (isAppInstalled()) return false;
-    if (localStorage.getItem(STORAGE_KEY_HIDDEN)) return false;
-    if (isIOS && localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) return false;
-    return true;
-  });
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
+  // Hidratar estado en el cliente
   useEffect(() => {
-    if (isIOS) {
-      const timer = setTimeout(() => {
-        if (!localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) {
-          setShowPrompt(true);
-        }
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    setMounted(true);
+    
+    // Detectar iOS
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const iOS = /iphone|ipad|ipod/.test(userAgent) && !(window as any).MSStream;
+    setIsIOS(iOS);
+
+    // Verificar si debe mostrar el prompt
+    if (isAppInstalled()) return;
+    if (localStorage.getItem(STORAGE_KEY_HIDDEN)) return;
+    if (iOS && localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) return;
+
+    setShowPrompt(true);
+  }, []);
+
+  // Manejar prompt de instalación para Android/Chrome
+  useEffect(() => {
+    if (!mounted || isIOS) return;
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -55,7 +58,20 @@ export default function InstallPrompt() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
-  }, [isIOS]);
+  }, [mounted, isIOS]);
+
+  // Timer para iOS (delay de 3 segundos)
+  useEffect(() => {
+    if (!mounted || !isIOS) return;
+
+    const timer = setTimeout(() => {
+      if (!localStorage.getItem(STORAGE_KEY_IOS_SHOWN) && !isAppInstalled()) {
+        setShowPrompt(true);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [mounted, isIOS]);
 
   const handleInstallClick = async () => {
     if (isIOS) {
@@ -83,7 +99,8 @@ export default function InstallPrompt() {
     localStorage.setItem(STORAGE_KEY_HIDDEN, "true");
   };
 
-  if (!showPrompt) return null;
+  // No renderizar nada hasta que esté montado (evita flash)
+  if (!mounted || !showPrompt) return null;
 
   return (
     <>

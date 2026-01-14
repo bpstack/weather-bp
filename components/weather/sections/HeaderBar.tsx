@@ -30,12 +30,23 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
               <span className="sm:hidden">☁️</span>
               <span className="hidden sm:inline">☁️ Weather App</span>
             </h1>
-            {weather && (
-              <span className="flex items-center gap-1 px-1 sm:px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] sm:text-xs">
-                <span className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                Live
+            <span
+              className="flex items-center gap-1 px-1 sm:px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs min-w-[45px] transition-colors"
+              style={{ opacity: weather ? 1 : 0.5 }}
+            >
+              <span
+                className={`w-1 h-1 rounded-full ${
+                  weather ? "bg-green-500 animate-pulse" : "bg-gray-300"
+                }`}
+              />
+              <span
+                className={
+                  weather ? "text-green-700 dark:text-green-400" : "text-gray-400"
+                }
+              >
+                {weather ? "Live" : "···"}
               </span>
-            )}
+            </span>
           </div>
 
           <div className="flex items-center gap-1">
