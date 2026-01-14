@@ -25,6 +25,28 @@ import CityModal from "./sections/CityModal";
 import WeatherAlerts from "./sections/WeatherAlerts";
 import { WeatherSkeleton, InitialSkeleton } from "./Skeletons";
 
+const STORAGE_KEY_CITY = "weather-bp-selected-city";
+
+function getStoredCity(): GeocodingCity | null {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem(STORAGE_KEY_CITY);
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return null;
+  }
+}
+
+function setStoredCity(city: GeocodingCity | null) {
+  if (typeof window === "undefined") return;
+  if (city) {
+    localStorage.setItem(STORAGE_KEY_CITY, JSON.stringify(city));
+  } else {
+    localStorage.removeItem(STORAGE_KEY_CITY);
+  }
+}
+
 const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
   return fetchWeather({
     latitude: city.latitude,
@@ -36,7 +58,7 @@ const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
 };
 
 export default function WeatherClient() {
-  const [selectedCity, setSelectedCity] = useState<GeocodingCity | null>(null);
+  const [selectedCity, setSelectedCity] = useState<GeocodingCity | null>(() => getStoredCity());
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -66,6 +88,7 @@ export default function WeatherClient() {
 
     if (result.city) {
       setSelectedCity(result.city);
+      setStoredCity(result.city);
       setLocationError(null);
     } else if (result.error) {
       setLocationError(result.error);
@@ -75,14 +98,21 @@ export default function WeatherClient() {
     return result;
   }, []);
 
-  // Auto-detect location on mount
+  // Auto-detect location on mount - use cached city immediately, then update in background
   useEffect(() => {
-    const detectLocation = async () => {
+    const initializeWithLocation = async () => {
+      const storedCity = getStoredCity();
+      
+      if (storedCity) {
+        setSelectedCity(storedCity);
+        setIsInitializing(false);
+      }
+      
       await requestGeolocation();
       setIsInitializing(false);
     };
 
-    detectLocation();
+    initializeWithLocation();
   }, [requestGeolocation]);
 
   const {
