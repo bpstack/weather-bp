@@ -26,6 +26,7 @@ import WeatherAlerts from "./sections/WeatherAlerts";
 import { WeatherSkeleton, InitialSkeleton } from "./Skeletons";
 
 const STORAGE_KEY_CITY = "weather-bp-selected-city";
+const STORAGE_KEY_TEMP_UNIT = "weather-bp-temp-unit";
 
 function getStoredCity(): GeocodingCity | null {
   if (typeof window === "undefined") return null;
@@ -47,6 +48,27 @@ function setStoredCity(city: GeocodingCity | null) {
   }
 }
 
+function getStoredTempUnit(): "C" | "F" {
+  if (typeof window === "undefined") return "C";
+  const stored = localStorage.getItem(STORAGE_KEY_TEMP_UNIT);
+  return stored === "F" ? "F" : "C";
+}
+
+function setStoredTempUnit(unit: "C" | "F") {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY_TEMP_UNIT, unit);
+}
+
+// Static data - defined outside component to avoid recreation
+const CONTINENTS = [
+  "En todo el mundo",
+  "Europa",
+  "América",
+  "Asia",
+  "Oceanía",
+  "África",
+];
+
 const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
   return fetchWeather({
     latitude: city.latitude,
@@ -67,17 +89,16 @@ export default function WeatherClient() {
     useState<string>("En todo el mundo");
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
-  const [tempUnit, setTempUnit] = useState<"C" | "F">("C");
+  const [tempUnit, setTempUnit] = useState<"C" | "F">(() => getStoredTempUnit());
 
-  const continents = [
-    "En todo el mundo",
-    "Europa",
-    "América",
-    "Asia",
-    "Oceanía",
-    "África",
-  ];
-  const popularCities = getPopularCities();
+  // Memoize popular cities to avoid recalculation on every render
+  const popularCities = useMemo(() => getPopularCities(), []);
+
+  // Handle temperature unit change with persistence
+  const handleTempUnitChange = useCallback((unit: "C" | "F") => {
+    setTempUnit(unit);
+    setStoredTempUnit(unit);
+  }, []);
 
   // Function to request geolocation
   const requestGeolocation = useCallback(async () => {
@@ -204,22 +225,22 @@ export default function WeatherClient() {
   // No city selected state (geolocation failed/denied)
   if (!selectedCity) {
     return (
-      <div className="min-h-screen bg-background p-4 pt-16">
+      <div className="min-h-screen bg-background p-4 pt-20">
         <div className="max-w-4xl mx-auto">
           <HeaderBar weather={null} icons={icons} />
 
-          <div className="bg-layer-1 border border-layer-3 rounded-lg p-6 mb-4 text-center">
-            <icons.MapPin className="w-12 h-12 mx-auto mb-4 text-text-secondary" />
-            <h2 className="text-lg font-semibold text-text-primary mb-2">
+          <div className="py-16 text-center">
+            <icons.MapPin className="w-12 h-12 mx-auto mb-6 text-text-tertiary" />
+            <h2 className="text-2xl font-light text-text-primary mb-3">
               Selecciona una ubicación
             </h2>
-            <p className="text-sm text-text-secondary mb-4">
+            <p className="text-text-secondary mb-8 max-w-md mx-auto">
               No pudimos detectar tu ubicación automáticamente. Puedes
-              intentarlo de nuevo o buscar una ciudad manualmente.
+              intentarlo de nuevo o buscar una ciudad.
             </p>
 
             {locationError && (
-              <div className="mb-4 text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-md px-3 py-2">
+              <div className="mb-6 text-sm text-amber-600 dark:text-amber-400 max-w-md mx-auto">
                 {locationError}
               </div>
             )}
@@ -228,7 +249,7 @@ export default function WeatherClient() {
               <button
                 onClick={requestGeolocation}
                 disabled={isLocating}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-layer-2 border border-layer-3 text-text-primary hover:border-accent/30 hover:text-accent transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="px-5 py-2.5 rounded-full text-text-primary hover:bg-layer-2 transition-all text-sm font-medium disabled:opacity-50 flex items-center gap-2"
               >
                 {isLocating ? (
                   <>
@@ -244,7 +265,7 @@ export default function WeatherClient() {
               </button>
               <button
                 onClick={() => setShowCitySelector(true)}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-accent text-white hover:bg-accent-hover transition-all font-medium text-sm shadow-sm hover:shadow-md"
+                className="px-5 py-2.5 rounded-full bg-accent text-white hover:bg-accent-hover transition-all text-sm font-medium"
               >
                 Buscar ciudad
               </button>
@@ -261,7 +282,7 @@ export default function WeatherClient() {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             searchLoading={searchLoading}
-            continents={continents}
+            continents={CONTINENTS}
             selectedContinent={selectedContinent}
             setSelectedContinent={setSelectedContinent}
             handleCitySelect={handleCitySelect}
@@ -290,7 +311,7 @@ export default function WeatherClient() {
         )}
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4 text-sm text-red-600 dark:text-red-400">
+          <div className="py-8 text-center text-red-600 dark:text-red-400">
             No se pudieron obtener los datos del tiempo
           </div>
         )}
@@ -299,36 +320,34 @@ export default function WeatherClient() {
           <>
             <WeatherAlerts weather={currentWeather} />
 
-            <div className="space-y-4">
-              <CurrentWeather
-                icons={icons}
+            <CurrentWeather
+              icons={icons}
+              weather={currentWeather}
+              tempUnit={tempUnit}
+              setTempUnit={handleTempUnitChange}
+              convertTemp={convertTemp}
+              getWeatherInfo={getWeatherInfo}
+              getWeatherIcon={getWeatherIcon}
+            />
+
+            <HourlyForecast
+              weather={currentWeather}
+              convertTemp={convertTemp}
+              tempUnit={tempUnit}
+            />
+
+            <WeatherDetails icons={icons} weather={currentWeather} />
+
+            {currentWeather.daily && (
+              <Forecast
                 weather={currentWeather}
-                tempUnit={tempUnit}
-                setTempUnit={setTempUnit}
+                forecastDays={forecastDays}
+                setForecastDays={setForecastDays}
                 convertTemp={convertTemp}
                 getWeatherInfo={getWeatherInfo}
                 getWeatherIcon={getWeatherIcon}
               />
-
-              <HourlyForecast
-                weather={currentWeather}
-                convertTemp={convertTemp}
-                tempUnit={tempUnit}
-              />
-
-              <WeatherDetails icons={icons} weather={currentWeather} />
-
-              {currentWeather.daily && (
-                <Forecast
-                  weather={currentWeather}
-                  forecastDays={forecastDays}
-                  setForecastDays={setForecastDays}
-                  convertTemp={convertTemp}
-                  getWeatherInfo={getWeatherInfo}
-                  getWeatherIcon={getWeatherIcon}
-                />
-              )}
-            </div>
+            )}
           </>
         )}
 
@@ -342,7 +361,7 @@ export default function WeatherClient() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           searchLoading={searchLoading}
-          continents={continents}
+          continents={CONTINENTS}
           selectedContinent={selectedContinent}
           setSelectedContinent={setSelectedContinent}
           handleCitySelect={handleCitySelect}

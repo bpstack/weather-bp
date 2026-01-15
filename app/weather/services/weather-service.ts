@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 const weatherSchema = z.object({
+  timezone: z.string(),
+  timezone_abbreviation: z.string(),
+  utc_offset_seconds: z.number(),
   current: z.object({
+    time: z.string(),
     temperature_2m: z.number(),
     apparent_temperature: z.number(),
     relative_humidity_2m: z.number(),

@@ -24,26 +24,29 @@ export default function Forecast({
   getWeatherIcon,
 }: Props) {
   return (
-    <div className="bg-layer-1 border border-layer-3 rounded-lg p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-text-primary">Pronóstico</h3>
+    <div className="py-6 border-t border-border-subtle">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xs font-medium text-text-tertiary uppercase tracking-wider">
+          Pronóstico
+        </h3>
         <div className="flex gap-1">
           <button
             onClick={() => setForecastDays(7)}
-            className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               forecastDays === 7
                 ? "bg-accent text-white"
-                : "bg-layer-2 text-text-secondary hover:bg-layer-3"
+                : "text-text-tertiary hover:text-text-primary hover:bg-layer-2"
             }`}
           >
             7 días
           </button>
           <button
             onClick={() => setForecastDays(16)}
-            className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               forecastDays === 16
                 ? "bg-accent text-white"
-                : "bg-layer-2 text-text-secondary hover:bg-layer-3"
+                : "text-text-tertiary hover:text-text-primary hover:bg-layer-2"
             }`}
           >
             16 días
@@ -51,59 +54,56 @@ export default function Forecast({
         </div>
       </div>
 
-      <div className="space-y-2">
+      {/* Forecast list */}
+      <div className="space-y-0">
         {weather.daily.time.slice(0, forecastDays).map((date, i) => {
           const isToday = i === 0;
           const weatherInfo = getWeatherInfo(weather.daily.weather_code[i]);
+
           return (
             <div
               key={date}
-              className={`flex items-center justify-between p-3 rounded-lg transition-all border ${
-                isToday
-                  ? "bg-accent/5 border-accent/20 dark:bg-accent/10"
-                  : "hover:bg-layer-2 border-transparent hover:border-layer-3"
+              className={`flex items-center justify-between py-4 ${
+                i !== 0 ? "border-t border-border-subtle" : ""
               }`}
             >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="flex-shrink-0">
+              {/* Left: Day and date */}
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="w-8 h-8 flex items-center justify-center opacity-60">
                   {getWeatherIcon(weather.daily.weather_code[i] ?? null, "sm")}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium text-text-primary text-sm block">
+                  <p
+                    className={`text-sm ${
+                      isToday ? "font-semibold" : "font-medium"
+                    } text-text-primary`}
+                  >
                     {isToday
                       ? "Hoy"
                       : new Date(date).toLocaleDateString("es-ES", {
                           weekday: "long",
                         })}
-                  </span>
-                  <span className="text-xs text-text-secondary block sm:hidden">
-                    {new Date(date).toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "short",
-                    })}{" "}
-                    • <span className={weatherInfo.color}>{weatherInfo.text}</span>
-                  </span>
-                  <span className="text-xs text-text-secondary hidden sm:block">
+                  </p>
+                  <p className="text-xs text-text-tertiary">
                     {new Date(date).toLocaleDateString("es-ES", {
                       day: "numeric",
                       month: "short",
                     })}
-                  </span>
+                  </p>
                 </div>
 
-                <div className="hidden sm:block flex-shrink-0">
-                  <span className={`text-xs font-medium ${weatherInfo.color}`}>
-                    {weatherInfo.text}
-                  </span>
-                </div>
+                <p className="hidden sm:block text-sm text-text-secondary flex-shrink-0">
+                  {weatherInfo.text}
+                </p>
               </div>
 
-              <div className="flex gap-3 text-sm flex-shrink-0 ml-3">
-                <span className="font-bold text-text-primary">
+              {/* Right: Temperatures */}
+              <div className="flex items-center gap-4 ml-6">
+                <span className="text-base font-semibold text-text-primary">
                   {convertTemp(weather.daily.temperature_2m_max[i] ?? null)}°
                 </span>
-                <span className="text-text-secondary">
+                <span className="text-base text-text-tertiary w-10 text-right">
                   {convertTemp(weather.daily.temperature_2m_min[i] ?? null)}°
                 </span>
               </div>

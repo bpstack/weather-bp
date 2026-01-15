@@ -18,7 +18,6 @@ interface Props {
 
 export default function CitySelector({
   icons = defaultIcons,
-  weather,
   selectedCity,
   setShowCitySelector,
   onCitySelect,
@@ -45,55 +44,45 @@ export default function CitySelector({
   };
 
   return (
-    <div className="bg-layer-1 border border-layer-3 rounded-lg p-4 mb-4 relative overflow-hidden">
-      {weather && (
-        <div
-          className={`absolute inset-0 bg-gradient-to-r ${
-            weather ? "from-green-50 to-blue-50" : ""
-          } opacity-10 dark:opacity-5`}
-        />
-      )}
-
-      <div className="relative flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-accent/10 text-accent">
-            <icons.MapPin className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="text-xs text-text-secondary uppercase tracking-wider font-medium">
-              Ubicación actual
-            </div>
-            <div className="font-semibold text-text-primary">
-              {selectedCity.name}, {selectedCity.country}
-            </div>
-          </div>
+    <div className="flex items-center justify-between py-4">
+      {/* Location info */}
+      <div className="flex items-center gap-3">
+        <div className="text-text-tertiary">
+          <icons.MapPin className="w-5 h-5" />
         </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleGetLocation}
-            disabled={isLocating}
-            className="p-2 rounded-lg bg-layer-2 border border-layer-3 text-text-secondary hover:text-accent hover:border-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Usar mi ubicación"
-            title="Usar mi ubicación"
-          >
-            {isLocating ? (
-              <icons.Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <icons.Navigation className="w-4 h-4" />
-            )}
-          </button>
-          <button
-            onClick={() => setShowCitySelector(true)}
-            className="px-3 py-1.5 rounded-lg bg-accent text-white hover:bg-accent-hover transition-all font-medium text-sm shadow-sm hover:shadow-md"
-          >
-            Cambiar
-          </button>
+        <div>
+          <p className="text-lg font-semibold text-text-primary">
+            {selectedCity.name}
+          </p>
+          <p className="text-sm text-text-tertiary">{selectedCity.country}</p>
         </div>
       </div>
 
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleGetLocation}
+          disabled={isLocating}
+          className="p-2.5 rounded-full text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all disabled:opacity-50"
+          aria-label="Usar mi ubicación"
+          title="Usar mi ubicación"
+        >
+          {isLocating ? (
+            <icons.Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <icons.Navigation className="w-5 h-5" />
+          )}
+        </button>
+        <button
+          onClick={() => setShowCitySelector(true)}
+          className="px-4 py-2 rounded-full bg-accent text-white hover:bg-accent-hover transition-all text-sm font-medium"
+        >
+          Cambiar
+        </button>
+      </div>
+
       {locationError && (
-        <div className="relative mt-3 text-xs text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500/20 rounded-md px-3 py-2">
+        <div className="absolute left-0 right-0 top-full mt-2 text-xs text-red-600 dark:text-red-400 bg-red-500/10 rounded-lg px-3 py-2">
           {locationError}
         </div>
       )}

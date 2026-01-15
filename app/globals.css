@@ -1,44 +1,58 @@
 @tailwind base;
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Light mode */
-  --color-background: #ffffff;
-  --color-foreground: #1f2328;
-  --color-text-primary: #1f2328;
-  --color-text-secondary: #656d76;
-  --color-layer-1: #f6f8fa;
-  --color-layer-2: #eaeef2;
-  --color-layer-3: #d0d7de;
+  /* Light mode - Minimalist palette with blue accent */
+  --color-background: #fafafa;
+  --color-foreground: #18181b;
+  --color-text-primary: #18181b;
+  --color-text-secondary: #71717a;
+  --color-text-tertiary: #a1a1aa;
+  --color-layer-1: #ffffff;
+  --color-layer-2: #f4f4f5;
+  --color-layer-3: #e4e4e7;
+  --color-border: #e4e4e7;
+  --color-border-subtle: #f4f4f5;
   --color-accent: #0969da;
   --color-accent-hover: #0757b5;
-  --color-accent-border: rgba(9, 105, 218, 0.6);
-  --color-canvas-subtle: #f6f8fa;
+  --color-accent-border: rgba(9, 105, 218, 0.3);
+  --color-canvas-subtle: #fafafa;
   --color-accent-rgb: 9, 105, 218;
 }
 
 .dark {
-  /* Dark mode */
-  --color-background: #010409;
-  --color-foreground: #e6edf3;
-  --color-text-primary: #e6edf3;
-  --color-text-secondary: #7d8590;
-  --color-layer-1: #0d1117;
-  --color-layer-2: #151b23;
-  --color-layer-3: #262c36;
+  /* Dark mode - Minimalist palette with muted green accent */
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-tertiary: #71717a;
+  --color-layer-1: #18181b;
+  --color-layer-2: #27272a;
+  --color-layer-3: #3f3f46;
+  --color-border: #27272a;
+  --color-border-subtle: #18181b;
   --color-accent: #238636;
   --color-accent-hover: #2ea043;
-  --color-accent-border: rgba(35, 134, 54, 0.6);
-  --color-canvas-subtle: #0d1117;
-  --color-accent-rgb: 63, 185, 80;
+  --color-accent-border: rgba(35, 134, 54, 0.4);
+  --color-canvas-subtle: #18181b;
+  --color-accent-rgb: 74, 222, 128;
 }
 
 @layer base {
   * {
     box-sizing: border-box;
-    transition-property: background-color, border-color, color;
+  }
+
+  /* Transitions only on interactive elements */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    transition-property: background-color, border-color, color, opacity;
     transition-duration: 200ms;
     transition-timing-function: ease-in-out;
   }
@@ -54,7 +68,8 @@
     background-color: var(--color-background);
     color: var(--color-text-primary);
     font-family: var(--font-poppins, "Poppins"), system-ui, sans-serif;
-    font-size: 13px;
+    font-size: 14px;
+    line-height: 1.6;
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;

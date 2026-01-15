@@ -26,56 +26,59 @@ export default function CurrentWeather({
   getWeatherInfo,
   getWeatherIcon,
 }: Props) {
+  const weatherInfo = getWeatherInfo(weather.current.weather_code ?? null);
+
   return (
-    <div className="bg-layer-1 border border-layer-3 rounded-lg overflow-hidden">
-      <div
-        className={`p-5 bg-gradient-to-r ${getWeatherInfo(weather.current.weather_code ?? null).bg} dark:bg-none`}
-      >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-baseline gap-2 mb-1">
-              <div className="text-5xl font-bold text-text-primary">
-                {convertTemp(weather.current.temperature_2m)}°
-              </div>
+    <div className={`py-8 sm:py-12 px-6 -mx-4 sm:-mx-6 rounded-3xl bg-gradient-to-br ${weatherInfo.bg} dark:bg-none dark:bg-transparent`}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        {/* Left: Temperature and conditions */}
+        <div className="flex-1">
+          {/* Temperature display */}
+          <div className="flex items-start gap-3 mb-4">
+            <span className="text-7xl sm:text-8xl font-extralight tracking-tighter text-text-primary">
+              {convertTemp(weather.current.temperature_2m)}
+            </span>
+            <div className="pt-3 flex flex-col gap-1">
               <div className="flex gap-1">
                 <button
                   onClick={() => setTempUnit("C")}
-                  className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
+                  className={`w-8 h-8 rounded-full text-sm font-medium transition-all ${
                     tempUnit === "C"
                       ? "bg-accent text-white"
-                      : "bg-layer-2 text-text-secondary hover:bg-layer-3"
+                      : "text-text-secondary hover:text-text-primary hover:bg-white/50 dark:hover:bg-white/10"
                   }`}
                 >
                   °C
                 </button>
                 <button
                   onClick={() => setTempUnit("F")}
-                  className={`px-1.5 py-0.5 rounded text-xs font-medium transition-colors ${
+                  className={`w-8 h-8 rounded-full text-sm font-medium transition-all ${
                     tempUnit === "F"
                       ? "bg-accent text-white"
-                      : "bg-layer-2 text-text-secondary hover:bg-layer-3"
+                      : "text-text-secondary hover:text-text-primary hover:bg-white/50 dark:hover:bg-white/10"
                   }`}
                 >
                   °F
                 </button>
               </div>
             </div>
-
-            <div
-              className={`text-lg font-medium mb-1 ${getWeatherInfo(weather.current.weather_code ?? null).color}`}
-            >
-              {getWeatherInfo(weather.current.weather_code ?? null).text}
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-text-secondary">
-              <icons.Thermometer className="w-3 h-3" />
-              <span>
-                Sensación: {convertTemp(weather.current.apparent_temperature)}°
-              </span>
-            </div>
           </div>
 
-          <div className="hidden sm:block">
+          {/* Weather description */}
+          <p className={`text-xl sm:text-2xl font-medium mb-2 ${weatherInfo.color} dark:text-text-secondary`}>
+            {weatherInfo.text}
+          </p>
+
+          {/* Feels like */}
+          <p className="text-sm text-text-secondary flex items-center gap-2">
+            <icons.Thermometer className="w-4 h-4" />
+            Sensación térmica {convertTemp(weather.current.apparent_temperature)}°
+          </p>
+        </div>
+
+        {/* Right: Weather icon */}
+        <div className="hidden sm:flex items-center justify-center">
+          <div className="w-28 h-28 flex items-center justify-center">
             {getWeatherIcon(weather.current.weather_code ?? null, "lg")}
           </div>
         </div>

@@ -82,7 +82,7 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="p-2 rounded-lg border border-layer-3 bg-layer-1 text-text-secondary hover:text-text-primary hover:border-accent/50 hover:bg-layer-2 transition-colors"
+      className="p-2 rounded-full text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all"
       aria-label="Cambiar tema"
     >
       {theme === "dark" ? (
