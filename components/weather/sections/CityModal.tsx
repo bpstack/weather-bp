@@ -30,12 +30,17 @@ export default function CityModal({
   setShowCitySelector,
 }: Props) {
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
+    const initialHeight = window.innerHeight;
+
     const updateHeight = () => {
       const vh = window.visualViewport?.height ?? window.innerHeight;
       setViewportHeight(vh);
+      // Detect if keyboard is open by comparing viewport to initial height
+      setKeyboardOpen(vh < initialHeight * 0.75);
     };
 
     updateHeight();
@@ -56,7 +61,9 @@ export default function CityModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      className={`fixed inset-0 z-50 flex justify-center ${
+        keyboardOpen ? "items-start pt-2" : "items-end sm:items-center"
+      }`}
       style={{ height: viewportHeight ? `${viewportHeight}px` : "100dvh" }}
     >
       {/* Backdrop */}
@@ -66,14 +73,20 @@ export default function CityModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-layer-1 w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl max-h-[85vh] sm:max-h-[70vh] flex flex-col overflow-hidden shadow-2xl">
-        {/* Handle bar (mobile) */}
-        <div className="sm:hidden flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-layer-3 rounded-full" />
-        </div>
+      <div
+        className={`relative bg-layer-1 w-full sm:max-w-md sm:rounded-2xl flex flex-col shadow-2xl ${
+          keyboardOpen ? "rounded-2xl mx-2 max-h-full" : "rounded-t-2xl max-h-[85vh] sm:max-h-[70vh]"
+        }`}
+      >
+        {/* Handle bar (mobile) - hide when keyboard is open */}
+        {!keyboardOpen && (
+          <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="w-10 h-1 bg-layer-3 rounded-full" />
+          </div>
+        )}
 
-        {/* Search */}
-        <div className="p-4 pb-2">
+        {/* Search - sticky header that stays visible when keyboard opens */}
+        <div className="flex-shrink-0 p-4 pb-2 bg-layer-1 sticky top-0 z-10">
           <div className="relative">
             <icons.Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
             <input
