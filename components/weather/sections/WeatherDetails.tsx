@@ -55,6 +55,11 @@ export default function WeatherDetails({
       ),
       iconRotate: true,
     },
+    {
+      icon: icons.Cloud,
+      label: "Nubes",
+      value: `${weather.current.cloud_cover ?? 0}%`,
+    },
   ];
 
   return (
@@ -67,7 +72,7 @@ export default function WeatherDetails({
         {details.map((detail, index) => {
           const Icon = detail.icon;
           return (
-            <div key={index} className="flex items-center gap-3">
+            <div key={index} className="flex flex-col items-center text-center gap-2">
               <div className="text-text-tertiary">
                 <Icon
                   className={`w-5 h-5 ${detail.iconRotate ? "rotate-180" : ""}`}

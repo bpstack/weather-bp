@@ -93,7 +93,7 @@ export default function Forecast({
                   </p>
                 </div>
 
-                <p className="text-sm text-text-secondary flex-shrink-0">
+                <p className="text-xs sm:text-sm text-text-secondary flex-shrink-0">
                   {weatherInfo.text}
                 </p>
               </div>

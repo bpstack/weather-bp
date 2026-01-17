@@ -13,6 +13,7 @@ const weatherSchema = z.object({
     precipitation: z.number(),
     pressure_msl: z.number(),
     weather_code: z.number(),
+    cloud_cover: z.number(),
   }),
   hourly: z.object({
     time: z.array(z.string()),
@@ -59,7 +60,7 @@ export async function fetchWeather({
   country,
   days = 16,
 }: FetchWeatherArgs): Promise<WeatherData> {
-  const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,uv_index_max&forecast_days=${days}&timezone=auto`;
+  const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,cloud_cover&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,uv_index_max&forecast_days=${days}&timezone=auto`;
 
   const res = await fetch(url);
   if (!res.ok) {
