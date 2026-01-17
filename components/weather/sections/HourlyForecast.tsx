@@ -194,7 +194,7 @@ export default function HourlyForecast({
 
             {/* Precipitation */}
             {hour.precipProb > 0 && (
-              <div className="flex items-center gap-1 text-blue-500/70">
+              <div className="flex items-center gap-1 text-blue-500 dark:text-sky-400">
                 <Droplets className="w-3 h-3" />
                 <span className="text-xs">{hour.precipProb}%</span>
               </div>

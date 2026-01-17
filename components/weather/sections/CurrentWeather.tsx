@@ -30,7 +30,7 @@ export default function CurrentWeather({
 
   return (
     <div className={`py-8 sm:py-12 px-6 -mx-4 sm:-mx-6 rounded-3xl bg-gradient-to-br ${weatherInfo.bg} dark:bg-none dark:bg-transparent`}>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="flex flex-row items-start justify-between gap-4">
         {/* Left: Temperature and conditions */}
         <div className="flex-1">
           {/* Temperature display */}
@@ -77,8 +77,8 @@ export default function CurrentWeather({
         </div>
 
         {/* Right: Weather icon */}
-        <div className="hidden sm:flex items-center justify-center">
-          <div className="w-28 h-28 flex items-center justify-center">
+        <div className="flex items-center justify-center pt-2">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">
             {getWeatherIcon(weather.current.weather_code ?? null, "lg")}
           </div>
         </div>

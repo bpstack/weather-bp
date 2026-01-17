@@ -69,11 +69,11 @@ export const getWeatherIcon = (
   if (code >= 45 && code <= 48)
     return <Cloud className={`${sizeClass} text-gray-400 opacity-80`} />;
   if (code >= 51 && code <= 67)
-    return <CloudRain className={`${sizeClass} text-blue-500`} />;
+    return <CloudRain className={`${sizeClass} text-blue-500 dark:text-sky-400`} />;
   if (code >= 71 && code <= 77)
-    return <CloudSnow className={`${sizeClass} text-blue-300`} />;
+    return <CloudSnow className={`${sizeClass} text-blue-300 dark:text-sky-300`} />;
   if (code >= 95)
-    return <CloudLightning className={`${sizeClass} text-purple-500`} />;
+    return <CloudLightning className={`${sizeClass} text-purple-500 dark:text-violet-400`} />;
   return <Cloud className={`${sizeClass} text-text-secondary`} />;
 };
 
@@ -100,36 +100,36 @@ export const getWeatherInfo = (
   if (code === 48) return { text: "Niebla con escarcha", color: "text-slate-500", bg: "from-slate-200/70 to-cyan-100/30" };
 
   // Drizzle - light blues
-  if (code === 51) return { text: "Llovizna ligera", color: "text-sky-500", bg: "from-sky-100/60 to-blue-100/40" };
-  if (code === 53) return { text: "Llovizna moderada", color: "text-sky-600", bg: "from-sky-100/70 to-blue-100/50" };
-  if (code === 55) return { text: "Llovizna intensa", color: "text-blue-600", bg: "from-blue-100/70 to-sky-100/50" };
-  if (code === 56) return { text: "Llovizna helada ligera", color: "text-sky-500", bg: "from-sky-100/60 to-cyan-100/40" };
-  if (code === 57) return { text: "Llovizna helada intensa", color: "text-blue-600", bg: "from-blue-100/70 to-cyan-100/50" };
+  if (code === 51) return { text: "Llovizna ligera", color: "text-sky-500 dark:text-sky-400", bg: "from-sky-100/60 to-blue-100/40" };
+  if (code === 53) return { text: "Llovizna moderada", color: "text-sky-600 dark:text-sky-400", bg: "from-sky-100/70 to-blue-100/50" };
+  if (code === 55) return { text: "Llovizna intensa", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-100/70 to-sky-100/50" };
+  if (code === 56) return { text: "Llovizna helada ligera", color: "text-sky-500 dark:text-sky-400", bg: "from-sky-100/60 to-cyan-100/40" };
+  if (code === 57) return { text: "Llovizna helada intensa", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-100/70 to-cyan-100/50" };
 
   // Rain - deeper blues
-  if (code === 61) return { text: "Lluvia ligera", color: "text-blue-600", bg: "from-blue-100/70 to-sky-100/50" };
-  if (code === 63) return { text: "Lluvia moderada", color: "text-blue-600", bg: "from-blue-200/70 to-blue-100/50" };
-  if (code === 65) return { text: "Lluvia intensa", color: "text-blue-700", bg: "from-blue-200/80 to-slate-200/50" };
-  if (code === 66) return { text: "Lluvia helada ligera", color: "text-blue-600", bg: "from-blue-100/70 to-cyan-100/50" };
-  if (code === 67) return { text: "Lluvia helada intensa", color: "text-blue-700", bg: "from-blue-200/80 to-cyan-100/50" };
+  if (code === 61) return { text: "Lluvia ligera", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-100/70 to-sky-100/50" };
+  if (code === 63) return { text: "Lluvia moderada", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-200/70 to-blue-100/50" };
+  if (code === 65) return { text: "Lluvia intensa", color: "text-blue-700 dark:text-sky-400", bg: "from-blue-200/80 to-slate-200/50" };
+  if (code === 66) return { text: "Lluvia helada ligera", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-100/70 to-cyan-100/50" };
+  if (code === 67) return { text: "Lluvia helada intensa", color: "text-blue-700 dark:text-sky-400", bg: "from-blue-200/80 to-cyan-100/50" };
 
   // Snow - cool cyans and light blues
-  if (code === 71) return { text: "Nevada ligera", color: "text-cyan-600", bg: "from-cyan-100/60 to-sky-100/40" };
-  if (code === 73) return { text: "Nevada moderada", color: "text-cyan-600", bg: "from-cyan-100/70 to-blue-100/50" };
-  if (code === 75) return { text: "Nevada intensa", color: "text-cyan-700", bg: "from-cyan-200/70 to-blue-100/50" };
-  if (code === 77) return { text: "Granizo", color: "text-cyan-600", bg: "from-slate-200/60 to-cyan-100/40" };
+  if (code === 71) return { text: "Nevada ligera", color: "text-cyan-600 dark:text-sky-300", bg: "from-cyan-100/60 to-sky-100/40" };
+  if (code === 73) return { text: "Nevada moderada", color: "text-cyan-600 dark:text-sky-300", bg: "from-cyan-100/70 to-blue-100/50" };
+  if (code === 75) return { text: "Nevada intensa", color: "text-cyan-700 dark:text-sky-300", bg: "from-cyan-200/70 to-blue-100/50" };
+  if (code === 77) return { text: "Granizo", color: "text-cyan-600 dark:text-sky-300", bg: "from-slate-200/60 to-cyan-100/40" };
 
   // Showers
-  if (code === 80) return { text: "Chubascos ligeros", color: "text-blue-600", bg: "from-blue-100/70 to-sky-100/50" };
-  if (code === 81) return { text: "Chubascos moderados", color: "text-blue-600", bg: "from-blue-200/70 to-sky-100/50" };
-  if (code === 82) return { text: "Chubascos intensos", color: "text-blue-700", bg: "from-blue-200/80 to-slate-200/50" };
-  if (code === 85) return { text: "Chubascos de nieve ligeros", color: "text-cyan-600", bg: "from-cyan-100/70 to-blue-100/50" };
-  if (code === 86) return { text: "Chubascos de nieve intensos", color: "text-cyan-700", bg: "from-cyan-200/70 to-blue-100/50" };
+  if (code === 80) return { text: "Chubascos ligeros", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-100/70 to-sky-100/50" };
+  if (code === 81) return { text: "Chubascos moderados", color: "text-blue-600 dark:text-sky-400", bg: "from-blue-200/70 to-sky-100/50" };
+  if (code === 82) return { text: "Chubascos intensos", color: "text-blue-700 dark:text-sky-400", bg: "from-blue-200/80 to-slate-200/50" };
+  if (code === 85) return { text: "Chubascos de nieve ligeros", color: "text-cyan-600 dark:text-sky-300", bg: "from-cyan-100/70 to-blue-100/50" };
+  if (code === 86) return { text: "Chubascos de nieve intensos", color: "text-cyan-700 dark:text-sky-300", bg: "from-cyan-200/70 to-blue-100/50" };
 
   // Thunderstorm - dramatic purples
-  if (code === 95) return { text: "Tormenta y lluvia", color: "text-violet-600", bg: "from-violet-100/70 to-slate-200/50" };
-  if (code === 96) return { text: "Tormenta, lluvia y granizo ligero", color: "text-violet-700", bg: "from-violet-200/70 to-slate-200/50" };
-  if (code === 99) return { text: "Tormenta, lluvia y granizo intenso", color: "text-purple-700", bg: "from-purple-200/70 to-slate-200/50" };
+  if (code === 95) return { text: "Tormenta y lluvia", color: "text-violet-600 dark:text-violet-400", bg: "from-violet-100/70 to-slate-200/50" };
+  if (code === 96) return { text: "Tormenta, lluvia y granizo ligero", color: "text-violet-700 dark:text-violet-400", bg: "from-violet-200/70 to-slate-200/50" };
+  if (code === 99) return { text: "Tormenta, lluvia y granizo intenso", color: "text-purple-700 dark:text-violet-400", bg: "from-purple-200/70 to-slate-200/50" };
 
   return {
     text: "Desconocido",
