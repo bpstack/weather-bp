@@ -48,3 +48,6 @@ public/sw.js
 
 # claude code
 .claude
+
+# docs
+/docs
