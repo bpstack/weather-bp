@@ -28,7 +28,6 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Weather BP",
   description: "Aplicación del tiempo con Open-Meteo",
-  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

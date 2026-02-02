@@ -48,13 +48,11 @@ export default function InstallPrompt() {
   /* -------- initial decision -------- */
   useEffect(() => {
     if (isAppInstalled()) return;
-    if (localStorage.getItem(STORAGE_KEY_HIDDEN)) return;
-    if (isIOS && localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) return;
+    if (localStorage.getItem(STORAGE_KEY_HIDDEN) && !isIOS) return;
 
-    // pequeño delay para UX suave
     const timer = setTimeout(() => {
       setShowPrompt(true);
-    }, isIOS ? 3000 : 0);
+    }, isIOS ? 5000 : 0);
 
     return () => clearTimeout(timer);
   }, [isIOS]);
@@ -101,12 +99,31 @@ export default function InstallPrompt() {
   };
 
   const handleClose = () => {
+    if (isIOS) {
+      setShowIOSInstructions(false);
+      localStorage.setItem(STORAGE_KEY_IOS_SHOWN, "true");
+    }
     setShowPrompt(false);
-    setShowIOSInstructions(false);
-    localStorage.setItem(STORAGE_KEY_HIDDEN, "true");
   };
 
-  if (!showPrompt) return null;
+  const handleResetInstructions = () => {
+    setShowIOSInstructions(true);
+  };
+
+  if (!showPrompt) {
+    if (isIOS && !localStorage.getItem(STORAGE_KEY_IOS_SHOWN)) {
+      return (
+        <button
+          onClick={handleResetInstructions}
+          className="fixed bottom-6 left-6 z-50 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-3 py-2 rounded-full shadow-lg text-xs hover:bg-indigo-200 dark:hover:bg-indigo-900 transition-colors"
+          aria-label="Ver cómo instalar"
+        >
+          📲 ¿Cómo instalar?
+        </button>
+      );
+    }
+    return null;
+  }
 
   /* -------------------- UI -------------------- */
 
@@ -165,21 +182,7 @@ export default function InstallPrompt() {
                   1
                 </span>
                 <span className="pt-0.5">
-                  Pulsa el icono{" "}
-                  <svg
-                    className="inline w-5 h-5 mx-0.5 text-blue-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3v11.25"
-                    />
-                  </svg>{" "}
-                  <strong>Compartir</strong> en la barra de Safari
+                  Pulsa el botón <strong style={{color: '#007AFF'}}>⬆️ Compartir</strong> en la barra inferior de Safari
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -187,8 +190,7 @@ export default function InstallPrompt() {
                   2
                 </span>
                 <span className="pt-0.5">
-                  Desplázate y selecciona{" "}
-                  <strong>&quot;Añadir a pantalla de inicio&quot;</strong>
+                  Desplázate hacia abajo y toca <strong>&quot;Añadir a pantalla de inicio&quot;</strong>
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -196,7 +198,7 @@ export default function InstallPrompt() {
                   3
                 </span>
                 <span className="pt-0.5">
-                  Pulsa <strong>&quot;Añadir&quot;</strong> en la esquina superior
+                  Pulsa <strong>&quot;Añadir&quot;</strong> arriba a la derecha
                 </span>
               </li>
             </ol>
