@@ -1,7 +1,9 @@
 {
+  "id": "/",
   "name": "Weather BP",
   "short_name": "Weather",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0B1118",
   "theme_color": "#6366f1",
@@ -14,7 +16,7 @@
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
-      "purpose": "apple-touch-icon"
+      "purpose": "any"
     },
     {
       "src": "/android-chrome-192x192.png",
