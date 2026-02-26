@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import {
   getWeatherIcon,
   getWeatherInfo,
 } from "@/app/weather/services/weather-utils";
+import DailyDetailModal from "./DailyDetailModal";
 
 interface Props {
   weather: WeatherData;
@@ -23,6 +25,8 @@ export default function Forecast({
   getWeatherInfo,
   getWeatherIcon,
 }: Props) {
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+
   return (
     <div className="py-6 border-t border-border-subtle">
       {/* Header */}
@@ -63,7 +67,8 @@ export default function Forecast({
           return (
             <div
               key={date}
-              className={`flex items-center justify-between py-4 ${
+              onClick={() => setSelectedDayIndex(i)}
+              className={`flex items-center justify-between py-4 cursor-pointer hover:bg-layer-2 rounded-xl px-2 -mx-2 transition-colors ${
                 i !== 0 ? "border-t border-border-subtle" : ""
               }`}
             >
@@ -111,6 +116,16 @@ export default function Forecast({
           );
         })}
       </div>
+
+      {/* Modal */}
+      {selectedDayIndex !== null && (
+        <DailyDetailModal
+          weather={weather}
+          dayIndex={selectedDayIndex}
+          convertTemp={convertTemp}
+          onClose={() => setSelectedDayIndex(null)}
+        />
+      )}
     </div>
   );
 }
