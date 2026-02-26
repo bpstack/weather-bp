@@ -49,19 +49,17 @@ export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
-  const [installed, setInstalled] = useState(true); // default true to avoid flash
-  const [dismissed, setDismissed] = useState(true);
+  const [installed, setInstalled] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return isAppInstalled();
+  });
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(STORAGE_KEY_DISMISSED) === "true";
+  });
 
   const isIOS = typeof window !== "undefined" && isIOSDevice();
   const isSafari = typeof window !== "undefined" && isInSafari();
-
-  // Check installed state and dismissed state on mount
-  useEffect(() => {
-    setInstalled(isAppInstalled());
-    setDismissed(
-      localStorage.getItem(STORAGE_KEY_DISMISSED) === "true",
-    );
-  }, []);
 
   // Listen for beforeinstallprompt (Chrome, Edge, etc.)
   useEffect(() => {

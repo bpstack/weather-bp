@@ -11,19 +11,25 @@ export default function FooterInfo({ icons = defaultIcons }: Props) {
     <div className="py-10 mt-8">
       <div className="text-center space-y-5">
         {/* Data attribution */}
-        <div className="flex items-center justify-center gap-2 text-text-tertiary text-sm">
-          <icons.Info className="w-4 h-4" />
-          <span>
-            Datos de{" "}
-            <a
-              href="https://open-meteo.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent transition-colors"
-            >
-              Open-Meteo API
-            </a>
-          </span>
+        <div className="flex items-center justify-center gap-1.5 text-text-tertiary text-sm">
+          <span>Datos meteorológicos por </span>
+          <a
+            href="https://open-meteo.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent transition-colors hover:underline"
+          >
+            Open-Meteo.com
+          </a>
+          <span> · </span>
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent transition-colors hover:underline"
+          >
+            CC BY 4.0
+          </a>
         </div>
 
         {/* Blog link */}
