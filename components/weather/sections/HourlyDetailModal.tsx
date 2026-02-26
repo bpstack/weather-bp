@@ -103,7 +103,14 @@ export default function HourlyDetailModal({
       onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
+        onClick={onClose}
+        onKeyDown={(e) => e.key === "Escape" && onClose()}
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
+      />
 
       {/* Modal */}
       <div
@@ -142,11 +149,11 @@ export default function HourlyDetailModal({
         {/* Details grid */}
         <div className="px-6 pb-6">
           <div className="grid grid-cols-2 gap-4">
-            {details.map((detail, index) => {
+            {details.map((detail) => {
               const Icon = detail.icon;
               return (
                 <div
-                  key={index}
+                  key={detail.label}
                   className="flex items-center gap-3 p-3 bg-layer-2 rounded-xl"
                 >
                   <div className="text-text-tertiary">

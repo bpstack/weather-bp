@@ -68,8 +68,12 @@ export default function CityModal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-default"
         onClick={handleClose}
+        onKeyDown={(e) => e.key === "Escape" && handleClose()}
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar modal"
       />
 
       {/* Modal */}
@@ -96,7 +100,6 @@ export default function CityModal({
               placeholder="Buscar ciudad..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
               className="w-full pl-12 pr-12 py-4 bg-layer-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/30 text-text-primary placeholder:text-text-tertiary text-base"
             />
             {searchLoading ? (

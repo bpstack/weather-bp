@@ -69,10 +69,10 @@ export default function WeatherDetails({
       </h3>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-6">
-        {details.map((detail, index) => {
+        {details.map((detail) => {
           const Icon = detail.icon;
           return (
-            <div key={index} className="flex flex-col items-center text-center gap-2">
+            <div key={detail.label} className="flex flex-col items-center text-center gap-2">
               <div className="text-text-tertiary">
                 <Icon
                   className={`w-5 h-5 ${detail.iconRotate ? "rotate-180" : ""}`}

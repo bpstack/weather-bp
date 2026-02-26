@@ -163,9 +163,9 @@ export default function HourlyForecast({
         className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {hours.map((hour, index) => (
+        {hours.map((hour) => (
           <div
-            key={index}
+            key={hour.time}
             onClick={() => setSelectedHourIndex(hour.actualIndex)}
             className="flex-shrink-0 flex flex-col items-center gap-3 min-w-[60px] cursor-pointer hover:bg-layer-2 rounded-xl p-2 -m-2 transition-colors"
           >

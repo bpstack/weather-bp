@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import useSWR from "swr";
 import { fetchWeather } from "@/app/weather/services/weather-service";
 import {
@@ -79,6 +79,17 @@ const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
   });
 };
 
+const geocodingFetcher = async (query: string): Promise<GeocodingCity[]> => {
+  const res = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=50&language=es&format=json`,
+  );
+  const data = await res.json();
+  return (data.results || []).map((city: GeocodingCity) => ({
+    ...city,
+    continent: getContinent(city.country_code),
+  }));
+};
+
 export default function WeatherClient() {
   const [selectedCity, setSelectedCity] = useState<GeocodingCity | null>(() => getStoredCity());
   const [isInitializing, setIsInitializing] = useState(true);
@@ -149,43 +160,43 @@ export default function WeatherClient() {
     },
   );
 
-  const [filteredSearch, setFilteredSearch] = useState<GeocodingCity[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  // Search with debounce - triggers at 3+ characters
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (searchQuery.length < 3) {
-      setFilteredSearch([]);
-      setSearchLoading(false);
       return;
     }
-    const controller = new AbortController();
-    setSearchLoading(true);
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchQuery)}&count=50&language=es&format=json`,
-          { signal: controller.signal },
-        );
-        const data = await res.json();
-        const results = (data.results || []).map((city: GeocodingCity) => ({
-          ...city,
-          continent: getContinent(city.country_code),
-        }));
-        setFilteredSearch(results);
-      } catch (e) {
-        if ((e as Error).name !== "AbortError") {
-          setFilteredSearch([]);
-        }
-      } finally {
-        setSearchLoading(false);
-      }
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
     }, 300);
+
     return () => {
-      controller.abort();
-      clearTimeout(timer);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, [searchQuery]);
+
+  const {
+    data: searchResults = [],
+    isLoading: searchLoading,
+  } = useSWR(
+    debouncedQuery.length >= 3 ? ["geocode", debouncedQuery] : null,
+    () => geocodingFetcher(debouncedQuery),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 1000,
+    },
+  );
+
+  const filteredSearch = searchResults;
 
   const filteredCities = useMemo(() => {
     // If searching, use search results; otherwise show popular cities
@@ -199,7 +210,6 @@ export default function WeatherClient() {
     setSelectedCity(city);
     setShowCitySelector(false);
     setSearchQuery("");
-    setFilteredSearch([]);
     setSelectedContinent("En todo el mundo");
   }, []);
 
