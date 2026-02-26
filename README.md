@@ -22,6 +22,7 @@ pnpm lint       # catch issues
 - **Unit toggles**: Celsius/Fahrenheit, 7-day/16-day forecasts.
 - **Weather alerts** for rain and heat thresholds.
 - **Hourly carousel** showing 24h forecast with temps and precipitation.
+- **Clickable hourly/daily forecasts** - detailed modals with wind gusts, cloud cover, humidity, precipitation probability, sunshine hours, daylight duration, UV index, and more.
 - **WMO code mapping** for every weather condition (drizzle through thunderstorms) with color coding.
 - **Theme toggle** that respects system preferences with semantic Tailwind tokens.
 - **Installable** on iOS, Android, and desktop as a native app.
@@ -69,10 +70,12 @@ components/weather/
     ├── CitySelector.tsx    # Current city, geolocation button
     ├── CityModal.tsx       # City picker with search + continent filter
     ├── CurrentWeather.tsx  # Hero: temp toggle, condition, icon
-    ├── WeatherDetails.tsx  # Humidity, wind, precip, pressure, UV, sunrise/sunset
+    ├── WeatherDetails.tsx  # Humidity, wind, precip, pressure, UV, sunrise/sunset, clouds
     ├── HourlyForecast.tsx  # 24h carousel with temps + precip %
+    ├── HourlyDetailModal.tsx  # Clickable hourly detail modal
     ├── WeatherAlerts.tsx   # Rain/heat warning banners
     ├── Forecast.tsx        # 7/16 day cards with detailed WMO descriptions
+    ├── DailyDetailModal.tsx    # Clickable daily detail modal
     └── FooterInfo.tsx      # Attribution, tech stack
 ```
 
