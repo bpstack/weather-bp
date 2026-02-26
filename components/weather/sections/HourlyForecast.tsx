@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import { getWeatherIcon } from "@/app/weather/services/weather-utils";
 import { ChevronLeft, ChevronRight, Droplets, Globe } from "lucide-react";
+import HourlyDetailModal from "./HourlyDetailModal";
 
 interface HourlyForecastProps {
   weather: WeatherData;
@@ -33,6 +34,7 @@ export default function HourlyForecast({
   convertTemp,
 }: HourlyForecastProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [selectedHourIndex, setSelectedHourIndex] = useState<number | null>(null);
 
   const hourlyData = weather?.hourly;
   const currentCode = weather?.current?.weather_code ?? 0;
@@ -93,8 +95,6 @@ export default function HourlyForecast({
       .slice(startIndex, startIndex + 24)
       .map((time, i) => {
         const actualIndex = startIndex + i;
-        // Parse the time string - extract hour directly from the string
-        // Format is "2024-01-15T14:00"
         const hourStr = time.slice(11, 13);
         const hour = parseInt(hourStr, 10);
         const temp = hourlyData.temperature_2m[actualIndex];
@@ -107,6 +107,7 @@ export default function HourlyForecast({
           precipProb,
           weatherCode,
           isNow: i === 0,
+          actualIndex,
         };
       });
   }, [hourlyData, currentCode, currentTime]);
@@ -165,7 +166,8 @@ export default function HourlyForecast({
         {hours.map((hour, index) => (
           <div
             key={index}
-            className="flex-shrink-0 flex flex-col items-center gap-3 min-w-[60px]"
+            onClick={() => setSelectedHourIndex(hour.actualIndex)}
+            className="flex-shrink-0 flex flex-col items-center gap-3 min-w-[60px] cursor-pointer hover:bg-layer-2 rounded-xl p-2 -m-2 transition-colors"
           >
             {/* Time */}
             <span
@@ -202,6 +204,16 @@ export default function HourlyForecast({
           </div>
         ))}
       </div>
+
+      {/* Modal */}
+      {selectedHourIndex !== null && (
+        <HourlyDetailModal
+          weather={weather}
+          hourIndex={selectedHourIndex}
+          convertTemp={convertTemp}
+          onClose={() => setSelectedHourIndex(null)}
+        />
+      )}
     </div>
   );
 }
