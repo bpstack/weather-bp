@@ -51,3 +51,6 @@ public/sw.js
 
 # docs
 /docs
+# Project documentation (private)
+ROADMAP.md
+TODO.md
