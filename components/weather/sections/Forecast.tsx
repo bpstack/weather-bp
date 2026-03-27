@@ -13,8 +13,6 @@ interface Props {
   forecastDays: 7 | 16;
   setForecastDays: (d: 7 | 16) => void;
   convertTemp: (t: number | null) => number | string;
-  getWeatherInfo: typeof getWeatherInfo;
-  getWeatherIcon: typeof getWeatherIcon;
 }
 
 export default function Forecast({
@@ -22,8 +20,6 @@ export default function Forecast({
   forecastDays,
   setForecastDays,
   convertTemp,
-  getWeatherInfo,
-  getWeatherIcon,
 }: Props) {
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 

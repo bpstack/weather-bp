@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { WeatherData } from "@/app/weather/services/weather-service";
 import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
 import {
   GeocodingCity,
@@ -9,19 +8,17 @@ import {
 } from "@/app/weather/services/city-utils";
 
 interface Props {
-  icons?: typeof defaultIcons;
-  weather?: WeatherData | null;
   selectedCity: GeocodingCity;
   setShowCitySelector: (v: boolean) => void;
   onCitySelect: (city: GeocodingCity) => void;
 }
 
 export default function CitySelector({
-  icons = defaultIcons,
   selectedCity,
   setShowCitySelector,
   onCitySelect,
 }: Props) {
+  const icons = defaultIcons;
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 

@@ -1,19 +1,14 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import useSWR from "swr";
+import { track } from "@vercel/analytics";
 import { fetchWeather } from "@/app/weather/services/weather-service";
-import {
-  GeocodingCity,
-  getContinent,
-  getPopularCities,
-  getUserLocation,
-} from "@/app/weather/services/city-utils";
-import {
-  getWeatherIcon,
-  getWeatherInfo,
-  icons,
-} from "@/app/weather/services/weather-utils";
+import { GeocodingCity } from "@/app/weather/services/city-utils";
+import { icons } from "@/app/weather/services/weather-utils";
+import { useWeatherLocation } from "@/hooks/useWeatherLocation";
+import { useCitySearch } from "@/hooks/useCitySearch";
+import { useTempUnit } from "@/hooks/useTempUnit";
 import CurrentWeather from "./sections/CurrentWeather";
 import WeatherDetails from "./sections/WeatherDetails";
 import Forecast from "./sections/Forecast";
@@ -25,127 +20,40 @@ import CityModal from "./sections/CityModal";
 import WeatherAlerts from "./sections/WeatherAlerts";
 import { WeatherSkeleton, InitialSkeleton } from "./Skeletons";
 
-const STORAGE_KEY_CITY = "weather-bp-selected-city";
-const STORAGE_KEY_TEMP_UNIT = "weather-bp-temp-unit";
-
-function getStoredCity(): GeocodingCity | null {
-  if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem(STORAGE_KEY_CITY);
-  if (!stored) return null;
-  try {
-    return JSON.parse(stored);
-  } catch {
-    return null;
-  }
-}
-
-function setStoredCity(city: GeocodingCity | null) {
-  if (typeof window === "undefined") return;
-  if (city) {
-    localStorage.setItem(STORAGE_KEY_CITY, JSON.stringify(city));
-  } else {
-    localStorage.removeItem(STORAGE_KEY_CITY);
-  }
-}
-
-function getStoredTempUnit(): "C" | "F" {
-  if (typeof window === "undefined") return "C";
-  const stored = localStorage.getItem(STORAGE_KEY_TEMP_UNIT);
-  return stored === "F" ? "F" : "C";
-}
-
-function setStoredTempUnit(unit: "C" | "F") {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY_TEMP_UNIT, unit);
-}
-
-// Static data - defined outside component to avoid recreation
-const CONTINENTS = [
-  "En todo el mundo",
-  "Europa",
-  "América",
-  "Asia",
-  "Oceanía",
-  "África",
-];
-
-const fetcher = async (key: string, city: GeocodingCity, days: 7 | 16) => {
-  return fetchWeather({
+const fetcher = (_key: string, city: GeocodingCity, days: 7 | 16) =>
+  fetchWeather({
     latitude: city.latitude,
     longitude: city.longitude,
     cityName: city.name,
     country: city.country,
     days,
   });
-};
-
-const geocodingFetcher = async (query: string): Promise<GeocodingCity[]> => {
-  const res = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=50&language=es&format=json`,
-  );
-  const data = await res.json();
-  return (data.results || []).map((city: GeocodingCity) => ({
-    ...city,
-    continent: getContinent(city.country_code),
-  }));
-};
 
 export default function WeatherClient() {
-  const [selectedCity, setSelectedCity] = useState<GeocodingCity | null>(() => getStoredCity());
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [isLocating, setIsLocating] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedContinent, setSelectedContinent] =
-    useState<string>("En todo el mundo");
-  const [showCitySelector, setShowCitySelector] = useState(false);
+  const {
+    selectedCity,
+    setSelectedCity,
+    isInitializing,
+    isLocating,
+    locationError,
+    requestGeolocation,
+  } = useWeatherLocation();
+
+  const {
+    showCitySelector,
+    setShowCitySelector,
+    searchQuery,
+    setSearchQuery,
+    selectedContinent,
+    setSelectedContinent,
+    filteredCities,
+    searchLoading,
+    resetSearch,
+    continents,
+  } = useCitySearch();
+
+  const { tempUnit, setTempUnit, convertTemp } = useTempUnit();
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
-  const [tempUnit, setTempUnit] = useState<"C" | "F">(() => getStoredTempUnit());
-
-  // Memoize popular cities to avoid recalculation on every render
-  const popularCities = useMemo(() => getPopularCities(), []);
-
-  // Handle temperature unit change with persistence
-  const handleTempUnitChange = useCallback((unit: "C" | "F") => {
-    setTempUnit(unit);
-    setStoredTempUnit(unit);
-  }, []);
-
-  // Function to request geolocation
-  const requestGeolocation = useCallback(async () => {
-    setIsLocating(true);
-    setLocationError(null);
-
-    const result = await getUserLocation();
-
-    if (result.city) {
-      setSelectedCity(result.city);
-      setStoredCity(result.city);
-      setLocationError(null);
-    } else if (result.error) {
-      setLocationError(result.error);
-    }
-
-    setIsLocating(false);
-    return result;
-  }, []);
-
-  // Auto-detect location on mount - use cached city immediately, then update in background
-  useEffect(() => {
-    const initializeWithLocation = async () => {
-      const storedCity = getStoredCity();
-      
-      if (storedCity) {
-        setSelectedCity(storedCity);
-        setIsInitializing(false);
-      }
-      
-      await requestGeolocation();
-      setIsInitializing(false);
-    };
-
-    initializeWithLocation();
-  }, [requestGeolocation]);
 
   const {
     data: weather,
@@ -157,71 +65,46 @@ export default function WeatherClient() {
       selectedCity ? fetcher("weather", selectedCity, forecastDays) : null,
     {
       revalidateOnFocus: false,
+      onErrorRetry: (err, _key, _config, revalidate, { retryCount }) => {
+        if (err.name === "TimeoutError" || err.name === "AbortError") return;
+        if (retryCount >= 2) return;
+        setTimeout(() => revalidate({ retryCount }), 5_000);
+      },
     },
   );
 
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (searchQuery.length < 3) {
-      return;
-    }
-
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    timerRef.current = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [searchQuery]);
-
-  const {
-    data: searchResults = [],
-    isLoading: searchLoading,
-  } = useSWR(
-    debouncedQuery.length >= 3 ? ["geocode", debouncedQuery] : null,
-    () => geocodingFetcher(debouncedQuery),
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 1000,
+  const handleCitySelect = useCallback(
+    (city: GeocodingCity) => {
+      setSelectedCity(city);
+      setShowCitySelector(false);
+      resetSearch();
+      track("city_select", { city: city.name, country: city.country });
     },
+    [setSelectedCity, setShowCitySelector, resetSearch],
   );
 
-  const filteredSearch = searchResults;
+  const handleTempUnitChange = useCallback(
+    (unit: "C" | "F") => {
+      setTempUnit(unit);
+      track("temp_unit_change", { unit });
+    },
+    [setTempUnit],
+  );
 
-  const filteredCities = useMemo(() => {
-    // If searching, use search results; otherwise show popular cities
-    const base = searchQuery.length >= 3 ? filteredSearch : popularCities;
+  const cityModal = showCitySelector ? (
+    <CityModal
+      filteredCities={filteredCities}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      searchLoading={searchLoading}
+      continents={continents}
+      selectedContinent={selectedContinent}
+      setSelectedContinent={setSelectedContinent}
+      handleCitySelect={handleCitySelect}
+      setShowCitySelector={setShowCitySelector}
+    />
+  ) : null;
 
-    if (selectedContinent === "En todo el mundo") return base;
-    return base.filter((city) => city.continent === selectedContinent);
-  }, [searchQuery, filteredSearch, popularCities, selectedContinent]);
-
-  const handleCitySelect = useCallback((city: GeocodingCity) => {
-    setSelectedCity(city);
-    setShowCitySelector(false);
-    setSearchQuery("");
-    setSelectedContinent("En todo el mundo");
-  }, []);
-
-  const convertTemp = (temp: number | null) => {
-    if (temp === null || temp === undefined) return "-";
-    if (tempUnit === "F") return Math.round((temp * 9) / 5 + 32);
-    return Math.round(temp);
-  };
-
-  const currentWeather = weather;
-
-  // Initial loading state - reserve space to prevent layout shift
   if (isInitializing) {
     return (
       <div className="min-h-screen bg-background p-4 pt-16">
@@ -232,12 +115,11 @@ export default function WeatherClient() {
     );
   }
 
-  // No city selected state (geolocation failed/denied)
   if (!selectedCity) {
     return (
       <div className="min-h-screen bg-background p-4 pt-20">
         <div className="max-w-4xl mx-auto">
-          <HeaderBar weather={null} icons={icons} />
+          <HeaderBar weather={null} />
 
           <div className="py-16 text-center">
             <icons.MapPin className="w-12 h-12 mx-auto mb-6 text-text-tertiary" />
@@ -282,23 +164,9 @@ export default function WeatherClient() {
             </div>
           </div>
 
-          <FooterInfo icons={icons} />
+          <FooterInfo />
         </div>
-
-        {showCitySelector && (
-          <CityModal
-            icons={icons}
-            filteredCities={filteredCities}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            searchLoading={searchLoading}
-            continents={CONTINENTS}
-            selectedContinent={selectedContinent}
-            setSelectedContinent={setSelectedContinent}
-            handleCitySelect={handleCitySelect}
-            setShowCitySelector={setShowCitySelector}
-          />
-        )}
+        {cityModal}
       </div>
     );
   }
@@ -306,19 +174,15 @@ export default function WeatherClient() {
   return (
     <div className="min-h-screen bg-background p-4 pt-16">
       <div className="max-w-4xl mx-auto">
-        <HeaderBar weather={currentWeather} icons={icons} />
+        <HeaderBar weather={weather} />
 
         <CitySelector
-          icons={icons}
-          weather={currentWeather}
           selectedCity={selectedCity}
           setShowCitySelector={setShowCitySelector}
           onCitySelect={handleCitySelect}
         />
 
-        {isLoading && (
-          <WeatherSkeleton />
-        )}
+        {isLoading && <WeatherSkeleton />}
 
         {error && (
           <div className="py-8 text-center text-red-600 dark:text-red-400">
@@ -326,58 +190,39 @@ export default function WeatherClient() {
           </div>
         )}
 
-        {currentWeather && !isLoading && !error && (
+        {weather && !isLoading && !error && (
           <>
-            <WeatherAlerts weather={currentWeather} />
+            <WeatherAlerts weather={weather} />
 
             <CurrentWeather
-              icons={icons}
-              weather={currentWeather}
+              weather={weather}
               tempUnit={tempUnit}
               setTempUnit={handleTempUnitChange}
               convertTemp={convertTemp}
-              getWeatherInfo={getWeatherInfo}
-              getWeatherIcon={getWeatherIcon}
             />
 
             <HourlyForecast
-              weather={currentWeather}
+              weather={weather}
               convertTemp={convertTemp}
               tempUnit={tempUnit}
             />
 
-            <WeatherDetails icons={icons} weather={currentWeather} />
+            <WeatherDetails weather={weather} />
 
-            {currentWeather.daily && (
+            {weather.daily && (
               <Forecast
-                weather={currentWeather}
+                weather={weather}
                 forecastDays={forecastDays}
                 setForecastDays={setForecastDays}
                 convertTemp={convertTemp}
-                getWeatherInfo={getWeatherInfo}
-                getWeatherIcon={getWeatherIcon}
               />
             )}
           </>
         )}
 
-        <FooterInfo icons={icons} />
+        <FooterInfo />
       </div>
-
-      {showCitySelector && (
-        <CityModal
-          icons={icons}
-          filteredCities={filteredCities}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          searchLoading={searchLoading}
-          continents={CONTINENTS}
-          selectedContinent={selectedContinent}
-          setSelectedContinent={setSelectedContinent}
-          handleCitySelect={handleCitySelect}
-          setShowCitySelector={setShowCitySelector}
-        />
-      )}
+      {cityModal}
     </div>
   );
 }

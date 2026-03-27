@@ -6,6 +6,7 @@ import Script from "next/script";
 import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import UpdateNotification from "./components/UpdateNotification";
 import InstallPrompt from "./components/InstallPrompt";
+import ErrorMonitor from "./components/ErrorMonitor";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -81,6 +82,7 @@ export default function RootLayout({
             gtag('config', 'G-FND85JTFN4');
           `}
         </Script>
+        <ErrorMonitor />
         <ServiceWorkerRegister />
         <UpdateNotification />
         <InstallPrompt />

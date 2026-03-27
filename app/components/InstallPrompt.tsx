@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { track } from "@vercel/analytics";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -96,6 +97,7 @@ export default function InstallPrompt() {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
 
+    track("pwa_install", { outcome, platform: "android" });
     if (outcome === "accepted") {
       setInstalled(true);
     }
@@ -106,7 +108,8 @@ export default function InstallPrompt() {
     setShowIOSInstructions(false);
     setDismissed(true);
     localStorage.setItem(STORAGE_KEY_DISMISSED, "true");
-  }, []);
+    track("pwa_install", { outcome: "dismissed", platform: isIOS ? "ios" : "android" });
+  }, [isIOS]);
 
   const handleCloseIOSModal = useCallback(() => {
     setShowIOSInstructions(false);

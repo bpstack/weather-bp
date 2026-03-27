@@ -8,24 +8,19 @@ import {
 } from "@/app/weather/services/weather-utils";
 
 interface Props {
-  icons?: typeof defaultIcons;
   weather: WeatherData;
   tempUnit: "C" | "F";
   setTempUnit: (unit: "C" | "F") => void;
   convertTemp: (t: number | null) => number | string;
-  getWeatherInfo: typeof getWeatherInfo;
-  getWeatherIcon: typeof getWeatherIcon;
 }
 
 export default function CurrentWeather({
-  icons = defaultIcons,
   weather,
   tempUnit,
   setTempUnit,
   convertTemp,
-  getWeatherInfo,
-  getWeatherIcon,
 }: Props) {
+  const icons = defaultIcons;
   const weatherInfo = getWeatherInfo(weather.current.weather_code ?? null);
 
   return (

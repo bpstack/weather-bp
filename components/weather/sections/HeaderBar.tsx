@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
+import NotificationBell from "./NotificationBell";
 
 interface HeaderProps {
   weather?: WeatherData | null;
@@ -51,7 +52,7 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
             </span>
           </div>
 
-          {/* Right: Social + Theme */}
+          {/* Right: Social + Notifications + Theme */}
           <div className="flex items-center gap-1">
             <a
               href="https://www.linkedin.com/in/salvadorperez2021/"
@@ -71,6 +72,7 @@ function HeaderBar({ weather, icons = defaultIcons }: HeaderProps) {
             >
               <icons.Github className="h-4 w-4" />
             </a>
+            {weather && <NotificationBell weather={weather} />}
             <ThemeToggle />
           </div>
         </div>
