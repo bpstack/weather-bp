@@ -202,4 +202,19 @@
   .animate-pulse-strong {
     animation: pulse-strong 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
+  @keyframes steam-rise {
+    0%   { opacity: 0; transform: translateY(2px) scaleX(1); }
+    30%  { opacity: 0.45; transform: translateY(-4px) scaleX(1.15); }
+    70%  { opacity: 0.2; transform: translateY(-9px) scaleX(0.85); }
+    100% { opacity: 0; transform: translateY(-14px) scaleX(1); }
+  }
+
+  .group:hover .steam-waft {
+    animation: steam-rise 1.4s ease-out infinite;
+  }
+  .group:hover .steam-waft:nth-child(2) {
+    animation-delay: 0.55s;
+    animation-duration: 1.7s;
+  }
 }

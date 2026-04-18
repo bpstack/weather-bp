@@ -1,6 +1,5 @@
 "use client";
 
-import { Coffee } from "lucide-react";
 import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
 
 interface Props {
@@ -44,10 +43,26 @@ export default function FooterInfo({ icons = defaultIcons }: Props) {
           <icons.ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </a>
 
-        {/* Credits */}
-        <div className="flex items-center justify-center gap-1 text-[11px] text-text-tertiary/60">
-          <span>Desarrollado por Bori</span>
-          <Coffee className="w-3 h-3" />
+        {/* Ko-fi */}
+        <div>
+        <a
+          href="https://ko-fi.com/I2I31XW2OT"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex items-center gap-2 py-1 transition-all duration-300 ease-out"
+        >
+          <span className="relative inline-block" aria-hidden="true">
+            <span className="steam-waft absolute -top-2 left-[15%] w-[2px] h-2.5 rounded-full bg-text-tertiary opacity-0" />
+            <span className="steam-waft absolute -top-2.5 left-[65%] w-[2px] h-3 rounded-full bg-text-tertiary opacity-0" />
+            <span className="text-sm inline-block transition-all duration-300 ease-in-out group-hover:scale-125">☕</span>
+          </span>
+          <span className="text-xs text-text-tertiary/60 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors duration-300">
+            ¿Te ha servido? Apóyalo con un café
+          </span>
+          <span className="text-xs text-amber-500 dark:text-amber-400 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ease-out">
+            →
+          </span>
+        </a>
         </div>
       </div>
     </div>
