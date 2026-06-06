@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  Droplets,
-  Wind,
-  CloudRain,
-  Thermometer,
-  X,
-  Sun,
-  Sunrise,
-  Sunset,
-} from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Droplets, Wind, Thermometer, X, Sun, Sunrise, Sunset } from "lucide-react";
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherIcon, getWeatherInfo } from "@/app/weather/services/weather-utils";
+import { getWeatherInfo } from "@/app/weather/services/weather-utils";
+import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 
 interface DailyDetailModalProps {
   weather: WeatherData;
@@ -20,18 +13,18 @@ interface DailyDetailModalProps {
   onClose: () => void;
 }
 
-function formatDuration(seconds: number | null): string {
-  if (seconds === null || seconds === undefined) return "-";
-  const hours = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  return `${hours}h ${mins}m`;
+const WIND_DIRS = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+
+function windDirection(degrees: number | null): string {
+  if (degrees === null || degrees === undefined) return "-";
+  return WIND_DIRS[Math.round(degrees / 45) % 8];
 }
 
-function getWindDirection(degrees: number | null): string {
-  if (degrees === null || degrees === undefined) return "-";
-  const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
-  const index = Math.round(degrees / 45) % 8;
-  return directions[index];
+function formatDuration(seconds: number | null): string {
+  if (seconds === null || seconds === undefined) return "-";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return `${h}h ${m}m`;
 }
 
 export default function DailyDetailModal({
@@ -40,140 +33,101 @@ export default function DailyDetailModal({
   convertTemp,
   onClose,
 }: DailyDetailModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
   const daily = weather.daily;
   const date = daily.time[dayIndex] ? new Date(daily.time[dayIndex]) : null;
 
   const dayStr = date
-    ? date.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
+    ? date.toLocaleDateString("es-ES", { weekday: "long" })
+    : "-";
+  const dateStr = date
+    ? date.toLocaleDateString("es-ES", { day: "numeric", month: "long" })
     : "-";
 
+  const weatherCode = daily.weather_code[dayIndex];
+  const weatherInfo = getWeatherInfo(weatherCode ?? 0);
+
+  const windDeg = daily.wind_direction_10m_dominant[dayIndex];
+
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    el.style.transform = "translateY(100%)";
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        el.style.transform = "";
+        el.classList.add("wx-sheet");
+      }, 16);
+    });
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   const details = [
-    {
-      icon: Thermometer,
-      label: "Máxima",
-      value: convertTemp(daily.temperature_2m_max[dayIndex]),
-      unit: "°",
-    },
-    {
-      icon: Thermometer,
-      label: "Mínima",
-      value: convertTemp(daily.temperature_2m_min[dayIndex]),
-      unit: "°",
-    },
-    {
-      icon: Thermometer,
-      label: "Sensación máx.",
-      value: convertTemp(daily.apparent_temperature_max[dayIndex]),
-      unit: "°",
-    },
-    {
-      icon: Thermometer,
-      label: "Sensación mín.",
-      value: convertTemp(daily.apparent_temperature_min[dayIndex]),
-      unit: "°",
-    },
+    { icon: Thermometer, label: "Sensación máx.", value: `${convertTemp(daily.apparent_temperature_max[dayIndex])}°`, colorClass: "text-sun" },
+    { icon: Thermometer, label: "Sensación mín.", value: `${convertTemp(daily.apparent_temperature_min[dayIndex])}°`, colorClass: "text-rain" },
     {
       icon: Wind,
       label: "Viento máx.",
-      value: Math.round(daily.wind_speed_10m_max[dayIndex] ?? 0),
-      unit: "km/h",
-      subValue: getWindDirection(daily.wind_direction_10m_dominant[dayIndex]),
+      value: `${Math.round(daily.wind_speed_10m_max[dayIndex] ?? 0)} km/h`,
+      colorClass: "text-text-tertiary",
+      sub: windDirection(windDeg),
     },
-    {
-      icon: Wind,
-      label: "Ráfagas máx.",
-      value: Math.round(daily.wind_gusts_10m_max[dayIndex] ?? 0),
-      unit: "km/h",
-    },
-    {
-      icon: CloudRain,
-      label: "Precipitación",
-      value: daily.precipitation_sum[dayIndex] ?? 0,
-      unit: "mm",
-    },
-    {
-      icon: Droplets,
-      label: "Prob. lluvia",
-      value: daily.precipitation_probability_max[dayIndex] ?? 0,
-      unit: "%",
-    },
-    {
-      icon: Droplets,
-      label: "Horas de lluvia",
-      value: daily.precipitation_hours[dayIndex] ?? 0,
-      unit: "h",
-    },
-    {
-      icon: Sun,
-      label: "Índice UV",
-      value: Math.round(daily.uv_index_max[dayIndex] ?? 0),
-      unit: "",
-    },
+    { icon: Wind, label: "Ráfagas máx.", value: `${Math.round(daily.wind_gusts_10m_max[dayIndex] ?? 0)} km/h`, colorClass: "text-text-tertiary" },
+    { icon: Droplets, label: "Precipitación", value: `${daily.precipitation_sum[dayIndex] ?? 0} mm`, colorClass: "text-rain" },
+    { icon: Droplets, label: "Prob. lluvia", value: `${daily.precipitation_probability_max[dayIndex] ?? 0}%`, colorClass: "text-rain" },
+    { icon: Droplets, label: "Horas de lluvia", value: `${daily.precipitation_hours[dayIndex] ?? 0} h`, colorClass: "text-rain" },
+    { icon: Sun, label: "Índice UV", value: `${Math.round(daily.uv_index_max[dayIndex] ?? 0)}`, colorClass: "text-sun" },
     {
       icon: Sunrise,
       label: "Amanecer",
       value: daily.sunrise[dayIndex]
-        ? new Date(daily.sunrise[dayIndex]).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(daily.sunrise[dayIndex]!).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
         : "-",
-      unit: "",
+      colorClass: "text-sun",
     },
     {
       icon: Sunset,
       label: "Atardecer",
       value: daily.sunset[dayIndex]
-        ? new Date(daily.sunset[dayIndex]).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(daily.sunset[dayIndex]!).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
         : "-",
-      unit: "",
+      colorClass: "text-sun",
     },
-    {
-      icon: Sun,
-      label: "Horas de sol",
-      value: formatDuration(daily.sunshine_duration[dayIndex]),
-      unit: "",
-    },
-    {
-      icon: Sun,
-      label: "Horas de luz",
-      value: formatDuration(daily.daylight_duration[dayIndex]),
-      unit: "",
-    },
+    { icon: Sun, label: "Horas de sol", value: formatDuration(daily.sunshine_duration[dayIndex]), colorClass: "text-sun" },
+    { icon: Sun, label: "Horas de luz", value: formatDuration(daily.daylight_duration[dayIndex]), colorClass: "text-sun" },
   ];
 
-  const weatherCode = daily.weather_code[dayIndex];
-  const weatherInfo = getWeatherInfo(weatherCode ?? 0);
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center" onClick={onClose}>
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default" 
-        onClick={onClose}
-        onKeyDown={(e) => e.key === "Escape" && onClose()}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
 
-      {/* Modal */}
+      {/* Panel */}
       <div
-        className="relative bg-layer-1 w-full max-w-sm rounded-2xl flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 max-h-[80vh]"
+        ref={panelRef}
+        className="relative bg-layer-1 w-full max-w-lg mx-auto rounded-t-[28px] sm:rounded-[22px] flex flex-col shadow-2xl max-h-[90vh] sm:max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 bg-layer-3 rounded-full" />
+        {/* Grabber — solo móvil */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-[38px] h-[5px] rounded-full bg-layer-3" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        {/* Fixed header */}
+        <div className="flex items-center justify-between px-6 py-3 border-b border-border-subtle flex-shrink-0">
           <div>
-            <p className="text-lg font-semibold text-text-primary capitalize">
-              {dayStr}
-            </p>
-            <p className="text-sm text-text-tertiary">{weatherInfo.text}</p>
+            <p className="text-lg font-semibold text-text-primary capitalize">{dayStr}</p>
+            <p className="text-sm text-text-tertiary">{dateStr} · {weatherInfo.text}</p>
           </div>
           <button
             onClick={onClose}
@@ -184,36 +138,38 @@ export default function DailyDetailModal({
           </button>
         </div>
 
-        {/* Weather icon */}
-        <div className="flex items-center justify-center gap-4 py-4 px-6">
-          <div className="w-16 h-16">
-            {getWeatherIcon(weatherCode, "lg")}
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          {/* Hero */}
+          <div className="flex flex-col items-center py-5 gap-2">
+            <WeatherIcon code={weatherCode ?? undefined} size={84} />
+            <div className="flex items-baseline gap-2">
+              <p className="font-extralight text-text-primary" style={{ fontSize: 52, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                {convertTemp(daily.temperature_2m_max[dayIndex])}°
+              </p>
+              <p className="text-xl text-text-tertiary">
+                / {convertTemp(daily.temperature_2m_min[dayIndex])}°
+              </p>
+            </div>
+            <p className="text-sm text-text-secondary">{weatherInfo.text}</p>
           </div>
-        </div>
 
-        {/* Details grid */}
-        <div className="px-6 pb-6 overflow-y-auto">
+          {/* Details grid */}
           <div className="grid grid-cols-2 gap-3">
-            {details.map((detail) => {
-              const Icon = detail.icon;
+            {details.map((d) => {
+              const Icon = d.icon;
               return (
                 <div
-                  key={detail.label}
-                  className="flex items-center gap-3 p-3 bg-layer-2 rounded-xl"
+                  key={d.label}
+                  className="glass-card p-3 flex items-center gap-3"
+                  style={{ borderRadius: 16 }}
                 >
-                  <div className="text-text-tertiary">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-text-tertiary truncate">{detail.label}</p>
-                    <p className="text-base font-medium text-text-primary flex items-center gap-1">
-                      {detail.value}
-                      {detail.unit && <span className="text-sm text-text-tertiary">{detail.unit}</span>}
-                      {detail.subValue && (
-                        <span className="text-xs text-text-tertiary ml-1 flex items-center">
-                          {detail.subValue}
-                        </span>
-                      )}
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${d.colorClass}`} />
+                  <div className="min-w-0">
+                    <p className="text-xs text-text-tertiary">{d.label}</p>
+                    <p className="text-[15px] font-medium text-text-primary">
+                      {d.value}
+                      {d.sub && <span className="text-xs text-text-tertiary ml-1">{d.sub}</span>}
                     </p>
                   </div>
                 </div>

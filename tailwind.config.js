@@ -23,6 +23,10 @@ module.exports = {
         "accent-hover": "var(--color-accent-hover)",
         "accent-border": "var(--color-accent-border)",
         "canvas-subtle": "var(--color-canvas-subtle)",
+        rain: "var(--color-rain)",
+        sun: "var(--color-sun)",
+        live: "var(--color-live)",
+        "accent-soft": "var(--color-accent-soft)",
       },
       keyframes: {
         "slide-up": {

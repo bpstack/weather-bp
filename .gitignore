@@ -49,6 +49,9 @@ public/sw.js
 # claude code
 .claude
 
+# agent skills (local)
+.agents
+
 # docs
 /docs
 # Project documentation (private)

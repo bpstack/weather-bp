@@ -5,7 +5,13 @@ import useSWR from "swr";
 import { track } from "@vercel/analytics";
 import { fetchWeather } from "@/app/weather/services/weather-service";
 import { GeocodingCity } from "@/app/weather/services/city-utils";
-import { icons } from "@/app/weather/services/weather-utils";
+import {
+  icons,
+  isNightTime,
+  getWeatherBackground,
+} from "@/app/weather/services/weather-utils";
+import { codeToKey } from "@/components/weather/icons/WeatherIcon";
+import { useTheme } from "@/components/ui/ThemeToggle";
 import { useWeatherLocation } from "@/hooks/useWeatherLocation";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { useTempUnit } from "@/hooks/useTempUnit";
@@ -54,6 +60,7 @@ export default function WeatherClient() {
 
   const { tempUnit, setTempUnit, convertTemp } = useTempUnit();
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
+  const theme = useTheme();
 
   const {
     data: weather,
@@ -90,6 +97,14 @@ export default function WeatherClient() {
     },
     [setTempUnit],
   );
+
+  // Compute dynamic background from current weather condition
+  const dynamicBg = weather
+    ? getWeatherBackground(
+        codeToKey(weather.current.weather_code, isNightTime(weather)),
+        theme === "dark",
+      )
+    : undefined;
 
   const cityModal = showCitySelector ? (
     <CityModal
@@ -172,7 +187,13 @@ export default function WeatherClient() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 pt-16">
+    <div
+      className="min-h-screen p-4 pt-16"
+      style={{
+        background: dynamicBg ?? "var(--color-background)",
+        transition: "background 0.5s ease",
+      }}
+    >
       <div className="max-w-4xl mx-auto">
         <HeaderBar weather={weather} />
 

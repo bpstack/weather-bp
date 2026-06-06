@@ -1,16 +1,9 @@
 "use client";
 
-import {
-  Droplets,
-  Wind,
-  CloudRain,
-  Cloud,
-  Thermometer,
-  X,
-  Navigation,
-} from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Droplets, Wind, CloudRain, Cloud, Thermometer, X, Navigation } from "lucide-react";
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherIcon } from "@/app/weather/services/weather-utils";
+import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 
 interface HourlyDetailModalProps {
   weather: WeatherData;
@@ -19,11 +12,18 @@ interface HourlyDetailModalProps {
   onClose: () => void;
 }
 
-function getWindDirection(degrees: number | null): string {
+const WIND_DIRS = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+const WIND_DEGS: Record<string, number> = {
+  N: 0, NE: 45, E: 90, SE: 135, S: 180, SO: 225, O: 270, NO: 315,
+};
+
+function windDirection(degrees: number | null): string {
   if (degrees === null || degrees === undefined) return "-";
-  const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
-  const index = Math.round(degrees / 45) % 8;
-  return directions[index];
+  return WIND_DIRS[Math.round(degrees / 45) % 8];
+}
+
+function hourIsNight(hour: number): boolean {
+  return hour < 7 || hour >= 21;
 }
 
 export default function HourlyDetailModal({
@@ -32,103 +32,96 @@ export default function HourlyDetailModal({
   convertTemp,
   onClose,
 }: HourlyDetailModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
   const hourly = weather.hourly;
-  const time = hourly.time[hourIndex] ? new Date(hourly.time[hourIndex]) : null;
-  
-  const hourStr = time 
+  const timeStr = hourly.time[hourIndex] ?? "";
+  const time = timeStr ? new Date(timeStr) : null;
+
+  const hourNum = timeStr ? parseInt(timeStr.slice(11, 13), 10) : 12;
+  const night = hourIsNight(hourNum);
+
+  const hourStr = time
     ? time.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
     : "-";
-  
   const dateStr = time
     ? time.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" })
     : "-";
 
+  const windDeg = hourly.wind_direction_10m[hourIndex];
+  const windDir = windDirection(windDeg);
+  const windDegIcon = windDeg !== null && windDeg !== undefined ? windDeg : (WIND_DEGS[windDir] ?? 0);
+
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    el.style.transform = "translateY(100%)";
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        el.style.transform = "";
+        el.classList.add("wx-sheet");
+      }, 16);
+    });
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
   const details = [
-    {
-      icon: Thermometer,
-      label: "Temperatura",
-      value: convertTemp(hourly.temperature_2m[hourIndex]),
-      unit: "°",
-    },
-    {
-      icon: Thermometer,
-      label: "Sensación",
-      value: convertTemp(hourly.apparent_temperature[hourIndex]),
-      unit: "°",
-    },
-    {
-      icon: Droplets,
-      label: "Humedad",
-      value: hourly.relative_humidity_2m[hourIndex] ?? "-",
-      unit: "%",
-    },
-    {
-      icon: Cloud,
-      label: "Nubes",
-      value: hourly.cloud_cover[hourIndex] ?? "-",
-      unit: "%",
-    },
+    { icon: Thermometer, label: "Temperatura", value: `${convertTemp(hourly.temperature_2m[hourIndex])}°`, colorClass: "text-text-tertiary" },
+    { icon: Thermometer, label: "Sensación", value: `${convertTemp(hourly.apparent_temperature[hourIndex])}°`, colorClass: "text-text-tertiary" },
+    { icon: Droplets, label: "Humedad", value: `${hourly.relative_humidity_2m[hourIndex] ?? "-"}%`, colorClass: "text-rain" },
+    { icon: Cloud, label: "Nubes", value: `${hourly.cloud_cover[hourIndex] ?? "-"}%`, colorClass: "text-text-tertiary" },
     {
       icon: Wind,
       label: "Viento",
-      value: Math.round(hourly.wind_speed_10m[hourIndex] ?? 0),
-      unit: "km/h",
-      subValue: getWindDirection(hourly.wind_direction_10m[hourIndex]),
+      value: `${Math.round(hourly.wind_speed_10m[hourIndex] ?? 0)} km/h`,
+      colorClass: "text-text-tertiary",
+      extra: (
+        <span className="inline-flex items-center gap-0.5 text-xs text-text-tertiary ml-1">
+          <Navigation
+            className="w-3 h-3"
+            style={{ transform: `rotate(${windDegIcon}deg)` }}
+          />
+          {windDir}
+        </span>
+      ),
     },
-    {
-      icon: Wind,
-      label: "Ráfagas",
-      value: Math.round(hourly.wind_gusts_10m[hourIndex] ?? 0),
-      unit: "km/h",
-    },
-    {
-      icon: CloudRain,
-      label: "Precipitación",
-      value: hourly.precipitation[hourIndex] ?? 0,
-      unit: "mm",
-    },
-    {
-      icon: Droplets,
-      label: "Prob. lluvia",
-      value: hourly.precipitation_probability[hourIndex] ?? 0,
-      unit: "%",
-    },
+    { icon: Wind, label: "Ráfagas", value: `${Math.round(hourly.wind_gusts_10m[hourIndex] ?? 0)} km/h`, colorClass: "text-text-tertiary" },
+    { icon: CloudRain, label: "Precipitación", value: `${hourly.precipitation[hourIndex] ?? 0} mm`, colorClass: "text-rain" },
+    { icon: Droplets, label: "Prob. lluvia", value: `${hourly.precipitation_probability[hourIndex] ?? 0}%`, colorClass: "text-rain" },
   ];
 
   const weatherCode = hourly.weather_code[hourIndex];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center" onClick={onClose}>
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
-        onClick={onClose}
-        onKeyDown={(e) => e.key === "Escape" && onClose()}
         role="button"
         tabIndex={-1}
         aria-label="Cerrar modal"
       />
 
-      {/* Modal */}
+      {/* Panel */}
       <div
-        className="relative bg-layer-1 w-full max-w-sm rounded-2xl flex flex-col shadow-2xl animate-in zoom-in-95 duration-200"
+        ref={panelRef}
+        className="relative bg-layer-1 w-full max-w-lg mx-auto rounded-t-[28px] sm:rounded-[22px] flex flex-col shadow-2xl max-h-[90vh] sm:max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-          <div className="w-10 h-1 bg-layer-3 rounded-full" />
+        {/* Grabber — solo móvil */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-[38px] h-[5px] rounded-full bg-layer-3" />
         </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
+        {/* Fixed header */}
+        <div className="flex items-center justify-between px-6 py-3 border-b border-border-subtle flex-shrink-0">
           <div>
-            <p className="text-lg font-semibold text-text-primary">
-              {hourStr}
-            </p>
-            <p className="text-sm text-text-tertiary">{dateStr}</p>
+            <p className="text-lg font-semibold text-text-primary">{hourStr}</p>
+            <p className="text-sm text-text-tertiary">{dateStr} · Detalle por hora</p>
           </div>
           <button
             onClick={onClose}
@@ -139,37 +132,35 @@ export default function HourlyDetailModal({
           </button>
         </div>
 
-        {/* Weather icon and main info */}
-        <div className="flex items-center justify-center gap-4 py-6 px-6">
-          <div className="w-16 h-16">
-            {getWeatherIcon(weatherCode, "lg")}
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          {/* Hero */}
+          <div className="flex flex-col items-center py-5 gap-2">
+            <WeatherIcon code={weatherCode} night={night} size={84} />
+            <p className="font-extralight text-text-primary" style={{ fontSize: 52, letterSpacing: "-0.03em", lineHeight: 1 }}>
+              {convertTemp(hourly.temperature_2m[hourIndex])}°
+            </p>
+            <p className="text-sm text-text-secondary">
+              Sensación {convertTemp(hourly.apparent_temperature[hourIndex])}°
+            </p>
           </div>
-        </div>
 
-        {/* Details grid */}
-        <div className="px-6 pb-6">
-          <div className="grid grid-cols-2 gap-4">
-            {details.map((detail) => {
-              const Icon = detail.icon;
+          {/* Details grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {details.map((d) => {
+              const Icon = d.icon;
               return (
                 <div
-                  key={detail.label}
-                  className="flex items-center gap-3 p-3 bg-layer-2 rounded-xl"
+                  key={d.label}
+                  className="glass-card p-3 flex items-center gap-3"
+                  style={{ borderRadius: 16 }}
                 >
-                  <div className="text-text-tertiary">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-text-tertiary">{detail.label}</p>
-                    <p className="text-base font-medium text-text-primary flex items-center gap-1">
-                      {detail.value}
-                      <span className="text-sm text-text-tertiary">{detail.unit}</span>
-                      {detail.subValue && (
-                        <span className="text-xs text-text-tertiary ml-1 flex items-center">
-                          <Navigation className="w-3 h-3" style={{ transform: `rotate(${detail.subValue === "N" ? 0 : detail.subValue === "E" ? 90 : detail.subValue === "S" ? 180 : detail.subValue === "W" ? -90 : 0}deg)` }} />
-                          {detail.subValue}
-                        </span>
-                      )}
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${d.colorClass}`} />
+                  <div className="min-w-0">
+                    <p className="text-xs text-text-tertiary">{d.label}</p>
+                    <p className="text-[15px] font-medium text-text-primary flex items-center gap-1 flex-wrap">
+                      {d.value}
+                      {d.extra}
                     </p>
                   </div>
                 </div>

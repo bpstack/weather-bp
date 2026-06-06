@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
+import { useEffect, useRef, useState } from "react";
+import { Search, MapPin, X, Loader2, Globe, ChevronDown } from "lucide-react";
 import { GeocodingCity } from "@/app/weather/services/city-utils";
 
 interface Props {
-  icons?: typeof defaultIcons;
   filteredCities: GeocodingCity[];
   searchQuery: string;
   setSearchQuery: (v: string) => void;
@@ -18,7 +17,6 @@ interface Props {
 }
 
 export default function CityModal({
-  icons = defaultIcons,
   filteredCities,
   searchQuery,
   setSearchQuery,
@@ -32,25 +30,35 @@ export default function CityModal({
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initialHeight = window.innerHeight;
-
     const updateHeight = () => {
       const vh = window.visualViewport?.height ?? window.innerHeight;
       setViewportHeight(vh);
-      // Detect if keyboard is open by comparing viewport to initial height
       setKeyboardOpen(vh < initialHeight * 0.75);
     };
-
     updateHeight();
     window.visualViewport?.addEventListener("resize", updateHeight);
     window.addEventListener("resize", updateHeight);
-
     return () => {
       window.visualViewport?.removeEventListener("resize", updateHeight);
       window.removeEventListener("resize", updateHeight);
     };
+  }, []);
+
+  // rAF trick for reliable slide-in even if tab was in background
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    el.style.transform = "translateY(100%)";
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        el.style.transform = "";
+        el.classList.add("wx-sheet");
+      }, 16);
+    });
   }, []);
 
   const handleClose = () => {
@@ -76,23 +84,26 @@ export default function CityModal({
         aria-label="Cerrar modal"
       />
 
-      {/* Modal */}
+      {/* Panel */}
       <div
-        className={`relative bg-layer-1 w-full sm:max-w-md sm:rounded-2xl flex flex-col shadow-2xl ${
-          keyboardOpen ? "rounded-2xl mx-2 max-h-full" : "rounded-t-2xl max-h-[85vh] sm:max-h-[70vh]"
+        ref={panelRef}
+        className={`relative bg-layer-1 w-full sm:max-w-md flex flex-col shadow-2xl ${
+          keyboardOpen
+            ? "rounded-[28px] mx-2 max-h-full"
+            : "rounded-t-[28px] sm:rounded-[28px] max-h-[85vh] sm:max-h-[70vh]"
         }`}
       >
-        {/* Handle bar (mobile) - hide when keyboard is open */}
+        {/* Grabber */}
         {!keyboardOpen && (
           <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
-            <div className="w-10 h-1 bg-layer-3 rounded-full" />
+            <div className="w-[38px] h-[5px] rounded-full bg-layer-3" />
           </div>
         )}
 
-        {/* Search - sticky header that stays visible when keyboard opens */}
+        {/* Search header */}
         <div className="flex-shrink-0 p-4 pb-2 bg-layer-1 sticky top-0 z-10">
           <div className="relative">
-            <icons.Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary" />
             <input
               type="search"
               inputMode="search"
@@ -103,13 +114,13 @@ export default function CityModal({
               className="w-full pl-12 pr-12 py-4 bg-layer-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/30 text-text-primary placeholder:text-text-tertiary text-base"
             />
             {searchLoading ? (
-              <icons.Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-text-tertiary" />
+              <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-text-tertiary" />
             ) : searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-layer-3 transition-colors"
               >
-                <icons.X className="w-4 h-4 text-text-tertiary" />
+                <X className="w-4 h-4 text-text-tertiary" />
               </button>
             )}
           </div>
@@ -123,16 +134,15 @@ export default function CityModal({
                 : "text-text-tertiary hover:text-text-secondary"
             }`}
           >
-            <icons.Globe className="w-4 h-4" />
+            <Globe className="w-4 h-4" />
             <span>
               {selectedContinent !== "En todo el mundo"
                 ? selectedContinent
                 : "Filtrar por continente"}
             </span>
-            <icons.ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
           </button>
 
-          {/* Continent filters */}
           {showFilters && (
             <div className="flex flex-wrap gap-2 mt-3">
               {continents.map((continent) => (
@@ -140,9 +150,7 @@ export default function CityModal({
                   key={continent}
                   onClick={() => {
                     setSelectedContinent(continent);
-                    if (continent !== "En todo el mundo") {
-                      setShowFilters(false);
-                    }
+                    if (continent !== "En todo el mundo") setShowFilters(false);
                   }}
                   className={`px-3 py-1.5 rounded-full text-sm transition-all ${
                     selectedContinent === continent
@@ -161,7 +169,7 @@ export default function CityModal({
         <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
           {filteredCities.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-text-tertiary">
-              <icons.MapPin className="w-10 h-10 mb-3 opacity-50" />
+              <MapPin className="w-10 h-10 mb-3 opacity-50" />
               <p className="text-sm">
                 {searchQuery.length > 0 && searchQuery.length < 3
                   ? "Escribe al menos 3 letras"
@@ -173,9 +181,7 @@ export default function CityModal({
           ) : (
             <div className="space-y-1">
               {searchQuery.length < 3 && (
-                <p className="text-xs text-text-tertiary mb-2 px-1">
-                  Ciudades populares
-                </p>
+                <p className="text-xs text-text-tertiary mb-2 px-1">Ciudades populares</p>
               )}
               {filteredCities.map((city) => (
                 <button
@@ -184,12 +190,10 @@ export default function CityModal({
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-layer-2 active:bg-layer-3 transition-all text-left group"
                 >
                   <div className="w-10 h-10 rounded-full bg-layer-2 group-hover:bg-layer-3 flex items-center justify-center flex-shrink-0 transition-colors">
-                    <icons.MapPin className="w-4 h-4 text-text-tertiary group-hover:text-accent" />
+                    <MapPin className="w-4 h-4 text-text-tertiary group-hover:text-accent" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-text-primary truncate">
-                      {city.name}
-                    </p>
+                    <p className="font-medium text-text-primary truncate">{city.name}</p>
                     <p className="text-sm text-text-tertiary truncate">
                       {city.admin1 && `${city.admin1}, `}{city.country}
                     </p>
@@ -200,13 +204,13 @@ export default function CityModal({
           )}
         </div>
 
-        {/* Close button (desktop) */}
+        {/* Desktop close */}
         <button
           onClick={handleClose}
           className="hidden sm:flex absolute top-4 right-4 p-2 rounded-full hover:bg-layer-2 transition-colors"
           aria-label="Cerrar"
         >
-          <icons.X className="w-5 h-5 text-text-tertiary" />
+          <X className="w-5 h-5 text-text-tertiary" />
         </button>
       </div>
     </div>

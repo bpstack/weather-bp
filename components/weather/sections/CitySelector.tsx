@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { icons as defaultIcons } from "@/app/weather/services/weather-utils";
+import { MapPin, Navigation, Loader2 } from "lucide-react";
 import {
   GeocodingCity,
   getUserLocation,
@@ -18,40 +18,34 @@ export default function CitySelector({
   setShowCitySelector,
   onCitySelect,
 }: Props) {
-  const icons = defaultIcons;
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
   const handleGetLocation = async () => {
     setIsLocating(true);
     setLocationError(null);
-
     const result = await getUserLocation();
-
     if (result.error) {
       setLocationError(result.error);
       setIsLocating(false);
       return;
     }
-
-    if (result.city) {
-      onCitySelect(result.city);
-    }
+    if (result.city) onCitySelect(result.city);
     setIsLocating(false);
   };
 
   return (
-    <div className="flex items-center justify-between py-4">
+    <div className="relative flex items-center justify-between py-4">
       {/* Location info */}
       <div className="flex items-center gap-3">
-        <div className="text-text-tertiary">
-          <icons.MapPin className="w-5 h-5" />
-        </div>
+        <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
         <div>
-          <p className="text-lg font-semibold text-text-primary">
+          <p className="font-semibold text-text-primary" style={{ fontSize: 22 }}>
             {selectedCity.name}
           </p>
-          <p className="text-sm text-text-tertiary">{selectedCity.country}</p>
+          <p className="text-text-tertiary" style={{ fontSize: 12.5 }}>
+            {selectedCity.country}
+          </p>
         </div>
       </div>
 
@@ -65,9 +59,9 @@ export default function CitySelector({
           title="Usar mi ubicación"
         >
           {isLocating ? (
-            <icons.Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
-            <icons.Navigation className="w-5 h-5" />
+            <Navigation className="w-5 h-5" />
           )}
         </button>
         <button

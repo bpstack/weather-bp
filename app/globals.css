@@ -19,6 +19,10 @@
   --color-accent-border: rgba(9, 105, 218, 0.3);
   --color-canvas-subtle: #fafafa;
   --color-accent-rgb: 9, 105, 218;
+  --color-rain: #2f7fd6;
+  --color-sun: #e8930c;
+  --color-live: #16a34a;
+  --color-accent-soft: rgba(9, 105, 218, 0.12);
 }
 
 .dark {
@@ -38,6 +42,10 @@
   --color-accent-border: rgba(35, 134, 54, 0.4);
   --color-canvas-subtle: #18181b;
   --color-accent-rgb: 74, 222, 128;
+  --color-rain: #5fa8e8;
+  --color-sun: #f5b73a;
+  --color-live: #4ade80;
+  --color-accent-soft: rgba(46, 160, 67, 0.18);
 }
 
 @layer base {
@@ -216,5 +224,58 @@
   .group:hover .steam-waft:nth-child(2) {
     animation-delay: 0.55s;
     animation-duration: 1.7s;
+  }
+
+  /* ── Weather icon animations ─────────────────────────────── */
+  @keyframes wx-spin  { to { transform: rotate(360deg); } }
+  @keyframes wx-pulse { 0%,100% { transform: scale(1); opacity:1 } 50% { transform: scale(1.06); opacity:.92 } }
+  @keyframes wx-glow  { 0%,100% { opacity:.55 } 50% { opacity:.85 } }
+  @keyframes wx-drift { 0%,100% { transform: translateX(0) } 50% { transform: translateX(2.5px) } }
+  @keyframes wx-bob   { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-1.8px) } }
+  @keyframes wx-rain  { 0% { transform: translateY(-3px); opacity:0 } 20% { opacity:1 } 80% { opacity:1 } 100% { transform: translateY(11px); opacity:0 } }
+  @keyframes wx-snow  { 0% { transform: translateY(-2px) translateX(0); opacity:0 } 25%{opacity:1} 75%{opacity:1} 100% { transform: translateY(11px) translateX(2px); opacity:0 } }
+  @keyframes wx-flash { 0%,55%,100% { opacity:1 } 60% { opacity:.25 } 65% { opacity:1 } 70%{opacity:.4} 75%{opacity:1} }
+
+  .wx-spin  { animation: wx-spin  26s  linear       infinite; transform-origin: center; }
+  .wx-pulse { animation: wx-pulse  4s  ease-in-out  infinite; transform-origin: center; }
+  .wx-glow  { animation: wx-glow   4s  ease-in-out  infinite; transform-origin: center; }
+  .wx-drift { animation: wx-drift  5s  ease-in-out  infinite; }
+  .wx-bob   { animation: wx-bob    4.5s ease-in-out infinite; }
+  .wx-flash { animation: wx-flash  3.5s ease-in-out infinite; }
+  .wx-drop  { animation: wx-rain   1.4s linear      infinite; }
+  .wx-flake { animation: wx-snow   2.6s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wx-spin, .wx-pulse, .wx-glow, .wx-drift,
+    .wx-bob,  .wx-flash, .wx-drop, .wx-flake {
+      animation: none !important;
+    }
+  }
+
+  /* ── Bottom-sheet modal ──────────────────────────────────── */
+  @keyframes wx-sheet-in {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  @media (max-width: 639px) {
+    .wx-sheet {
+      animation: wx-sheet-in 320ms cubic-bezier(.22, 1, .36, 1) forwards;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wx-sheet { animation: none !important; }
+  }
+
+  /* ── Glass card ──────────────────────────────────────────── */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 22px;
+  }
+  .dark .glass-card {
+    background: rgba(24, 24, 27, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.09);
   }
 }

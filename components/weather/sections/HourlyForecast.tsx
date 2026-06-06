@@ -2,8 +2,8 @@
 
 import { useRef, useMemo, useState } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherIcon } from "@/app/weather/services/weather-utils";
-import { ChevronLeft, ChevronRight, Droplets, Globe } from "lucide-react";
+import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
+import { ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import HourlyDetailModal from "./HourlyDetailModal";
 
 interface HourlyForecastProps {
@@ -18,15 +18,17 @@ function getHourlyWeatherCode(precipProb: number, currentCode: number): number {
   return currentCode;
 }
 
-// Format UTC offset as "+X" or "-X" hours
 function formatUtcOffset(seconds: number): string {
   const hours = Math.round(seconds / 3600);
   return hours >= 0 ? `+${hours}` : `${hours}`;
 }
 
-// Get user's local UTC offset in seconds
 function getUserUtcOffsetSeconds(): number {
   return -new Date().getTimezoneOffset() * 60;
+}
+
+function hourIsNight(hour: number): boolean {
+  return hour < 7 || hour >= 21;
 }
 
 export default function HourlyForecast({
@@ -38,17 +40,14 @@ export default function HourlyForecast({
 
   const hourlyData = weather?.hourly;
   const currentCode = weather?.current?.weather_code ?? 0;
-  const currentTime = weather?.current?.time; // City's current time from API
+  const currentTime = weather?.current?.time;
   const cityUtcOffset = weather?.utc_offset_seconds ?? 0;
   const timezoneAbbr = weather?.timezone_abbreviation ?? "";
 
-  // Calculate timezone difference info
   const timezoneInfo = useMemo(() => {
     const userOffset = getUserUtcOffsetSeconds();
     const diffSeconds = cityUtcOffset - userOffset;
     const diffHours = Math.round(diffSeconds / 3600);
-
-    // Only show if there's a significant difference (1+ hours)
     if (Math.abs(diffHours) >= 1) {
       const sign = diffHours > 0 ? "+" : "";
       return {
@@ -64,32 +63,19 @@ export default function HourlyForecast({
   const hours = useMemo(() => {
     if (!hourlyData?.time?.length) return [];
 
-    // Use the city's current time from API to find the starting hour
-    // This is the correct approach as both currentTime and hourlyData.time
-    // are in the city's local timezone
     let startIndex = 0;
-
     if (currentTime) {
-      // Extract hour prefix from current time (e.g., "2024-01-15T14" from "2024-01-15T14:30")
       const currentHourPrefix = currentTime.slice(0, 13);
-
-      // Find the matching hour in hourly data
       startIndex = hourlyData.time.findIndex((time) =>
         time.slice(0, 13) === currentHourPrefix
       );
-
-      // If exact match not found, find the closest future hour
       if (startIndex === -1) {
         startIndex = hourlyData.time.findIndex((time) =>
           time.slice(0, 13) > currentHourPrefix
         );
       }
     }
-
-    // Fallback: start from beginning if no match found
-    if (startIndex === -1) {
-      startIndex = 0;
-    }
+    if (startIndex === -1) startIndex = 0;
 
     return hourlyData.time
       .slice(startIndex, startIndex + 24)
@@ -107,6 +93,7 @@ export default function HourlyForecast({
           precipProb,
           weatherCode,
           isNow: i === 0,
+          night: hourIsNight(hour),
           actualIndex,
         };
       });
@@ -114,9 +101,8 @@ export default function HourlyForecast({
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = 200;
       scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
+        left: direction === "left" ? -200 : 200,
         behavior: "smooth",
       });
     }
@@ -129,7 +115,10 @@ export default function HourlyForecast({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-xs font-medium text-text-tertiary uppercase tracking-wider">
+          <h3
+            className="font-semibold text-text-tertiary uppercase"
+            style={{ fontSize: 11.5, letterSpacing: "0.09em" }}
+          >
             Próximas 24 horas
           </h3>
           {timezoneInfo.showIndicator && (
@@ -142,14 +131,14 @@ export default function HourlyForecast({
         <div className="flex gap-1">
           <button
             onClick={() => scroll("left")}
-            className="p-2 rounded-full text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all"
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all"
             aria-label="Desplazar a la izquierda"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => scroll("right")}
-            className="p-2 rounded-full text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all"
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all"
             aria-label="Desplazar a la derecha"
           >
             <ChevronRight className="w-4 h-4" />
@@ -157,51 +146,52 @@ export default function HourlyForecast({
         </div>
       </div>
 
-      {/* Scrollable hours */}
+      {/* Scrollable strip */}
       <div
         ref={scrollRef}
-        className="flex gap-6 overflow-x-auto py-2 scrollbar-hide"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-x" }}
       >
         {hours.map((hour) => (
-          <div
-            key={hour.time}
+          <button
+            key={hour.time + hour.actualIndex}
             onClick={() => setSelectedHourIndex(hour.actualIndex)}
-            className="flex-shrink-0 flex flex-col items-center gap-3 min-w-[60px] cursor-pointer hover:bg-layer-2 rounded-xl p-2 -m-2 transition-colors"
+            className={`snap-start flex-shrink-0 flex flex-col items-center gap-[7px] px-1 py-3 rounded-[18px] transition-all cursor-pointer ${
+              hour.isNow
+                ? "bg-accent-soft border border-transparent"
+                : "bg-white/40 dark:bg-white/[0.045] border border-[rgba(0,0,0,0.07)] dark:border-[rgba(255,255,255,0.09)] hover:bg-white/60 dark:hover:bg-white/10"
+            }`}
+            style={{ width: 66 }}
           >
             {/* Time */}
-            <span
-              className={`text-sm ${
-                hour.isNow
-                  ? "font-semibold text-text-primary"
-                  : "text-text-secondary"
-              }`}
-            >
+            <span className="text-[12px] text-text-secondary">
               {hour.time}
             </span>
 
             {/* Icon */}
-            <div className="w-8 h-8 flex items-center justify-center opacity-70">
-              {getWeatherIcon(hour.weatherCode, "sm")}
+            <div className="flex items-center justify-center">
+              <WeatherIcon
+                code={hour.weatherCode}
+                night={hour.night}
+                size={36}
+              />
             </div>
 
             {/* Temperature */}
-            <span
-              className={`text-base ${
-                hour.isNow ? "font-semibold" : "font-medium"
-              } text-text-primary`}
-            >
+            <span className="text-[15px] font-semibold text-text-primary">
               {convertTemp(hour.temp)}°
             </span>
 
             {/* Precipitation */}
-            {hour.precipProb > 0 && (
-              <div className="flex items-center gap-1 text-blue-500 dark:text-sky-400">
-                <Droplets className="w-3 h-3" />
-                <span className="text-xs">{hour.precipProb}%</span>
-              </div>
-            )}
-          </div>
+            <span
+              className="text-[11px] font-medium"
+              style={{
+                color: hour.precipProb > 25 ? "var(--color-rain)" : "transparent",
+              }}
+            >
+              {hour.precipProb}%
+            </span>
+          </button>
         ))}
       </div>
 

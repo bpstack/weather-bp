@@ -73,6 +73,10 @@ const subscribe = (listener: Subscriber) => {
 const getSnapshot: SnapshotFn = () => themeStore;
 const getServerSnapshot: SnapshotFn = () => "light";
 
+export function useTheme() {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
