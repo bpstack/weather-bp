@@ -17,23 +17,22 @@ const sizes = [
   { file: "android-chrome-512x512-maskable.png", size: 512, maskable: true },
 ];
 
-// For maskable icons the safe zone is the center 80% → pad to 20% on each side
+// Dark navy background color matching the SVG gradient start
+const BG = { r: 14, g: 31, b: 56, alpha: 1 };
+
+// All PNGs are rendered on a solid full-bleed background so no OS (iOS/Android)
+// fills transparent corners with black.
 async function renderSvg(svgBuf, px, maskable) {
-  if (!maskable) {
-    return sharp(svgBuf, { density: Math.round((px / 64) * 72) })
-      .resize(px, px)
-      .png()
-      .toBuffer();
-  }
-  // Maskable: render icon at 73% of canvas, center it on dark bg
-  const iconPx = Math.round(px * 0.73);
-  const pad = Math.round((px - iconPx) / 2);
+  const iconPx = maskable ? Math.round(px * 0.73) : px;
+  const pad = maskable ? Math.round((px - iconPx) / 2) : 0;
+
   const iconBuf = await sharp(svgBuf, { density: Math.round((iconPx / 64) * 72) })
     .resize(iconPx, iconPx)
     .png()
     .toBuffer();
+
   return sharp({
-    create: { width: px, height: px, channels: 4, background: { r: 12, g: 28, b: 54, alpha: 1 } },
+    create: { width: px, height: px, channels: 4, background: BG },
   })
     .composite([{ input: iconBuf, left: pad, top: pad }])
     .png()
