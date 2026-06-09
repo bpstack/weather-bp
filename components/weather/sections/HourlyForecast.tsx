@@ -150,7 +150,7 @@ export default function HourlyForecast({
       <div
         ref={scrollRef}
         className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-x" }}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-x pan-y" }}
       >
         {hours.map((hour) => (
           <button

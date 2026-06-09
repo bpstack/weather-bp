@@ -15,7 +15,7 @@
   </defs>
 
   <!-- Background rounded square -->
-  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect width="64" height="64" fill="url(#bg)"/>
 
   <!-- Sun rays (above/left of cloud) -->
   <line x1="21" y1="5"   x2="21" y2="10"  stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
