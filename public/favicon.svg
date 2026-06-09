@@ -1,35 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Weather BP">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#1e3f6e"/>
-      <stop offset="100%" stop-color="#0c1c36"/>
-    </linearGradient>
     <radialGradient id="sunFill" cx="40%" cy="35%" r="60%">
       <stop offset="0%" stop-color="#FDE68A"/>
       <stop offset="100%" stop-color="#F59E0B"/>
     </radialGradient>
-    <linearGradient id="cloudFill" x1="16" y1="34" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#BAE6FD"/>
-    </linearGradient>
   </defs>
 
-  <!-- Background rounded square -->
-  <rect width="64" height="64" fill="url(#bg)"/>
+  <!-- Background: white, full square, no rounding -->
+  <rect width="64" height="64" rx="14" fill="#FFFFFF"/>
 
-  <!-- Sun rays (above/left of cloud) -->
-  <line x1="21" y1="5"   x2="21" y2="10"  stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
-  <line x1="30.5" y1="7.8" x2="27.8" y2="11.8" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
-  <line x1="11.5" y1="7.8" x2="14.2" y2="11.8" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
-  <line x1="6"  y1="21"  x2="11"  y2="21"  stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
-  <line x1="7.8" y1="30.5" x2="11.8" y2="27.8" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
+  <!-- Sun rays: 8 uniform rays at 45° intervals, center (21,21) -->
+  <line x1="21"  y1="8.5"  x2="21"  y2="3"    stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="29.8" y1="12.2" x2="33.7" y2="8.3"  stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="33.5" y1="21"  x2="39"  y2="21"   stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="29.8" y1="29.8" x2="33.7" y2="33.7" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="21"  y1="33.5" x2="21"  y2="39"   stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="12.2" y1="29.8" x2="8.3"  y2="33.7" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="8.5"  y1="21"  x2="3"   y2="21"   stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="12.2" y1="12.2" x2="8.3"  y2="8.3"  stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
 
   <!-- Sun disc -->
   <circle cx="21" cy="21" r="9.5" fill="url(#sunFill)"/>
 
-  <!-- Cloud (filled shapes overlapping sun) -->
-  <circle cx="25" cy="43" r="8.5"  fill="url(#cloudFill)"/>
-  <circle cx="36" cy="38" r="10.5" fill="url(#cloudFill)"/>
-  <circle cx="47" cy="42" r="8"    fill="url(#cloudFill)"/>
-  <rect x="17" y="43" width="38" height="14" rx="7" fill="url(#cloudFill)"/>
+  <!-- Cloud: solid celeste -->
+  <circle cx="25" cy="43" r="8.5"  fill="#7DD3FC"/>
+  <circle cx="36" cy="38" r="10.5" fill="#7DD3FC"/>
+  <circle cx="47" cy="42" r="8"    fill="#7DD3FC"/>
+  <rect x="17" y="43" width="38" height="14" rx="7" fill="#7DD3FC"/>
 </svg>

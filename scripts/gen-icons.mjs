@@ -17,8 +17,7 @@ const sizes = [
   { file: "android-chrome-512x512-maskable.png", size: 512, maskable: true },
 ];
 
-// Dark navy background color matching the SVG gradient start
-const BG = { r: 14, g: 31, b: 56, alpha: 1 };
+const BG = { r: 255, g: 255, b: 255, alpha: 1 };
 
 // All PNGs are rendered on a solid full-bleed background so no OS (iOS/Android)
 // fills transparent corners with black.
