@@ -15,6 +15,7 @@ import { useTheme } from "@/components/ui/ThemeToggle";
 import { useWeatherLocation } from "@/hooks/useWeatherLocation";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { useTempUnit } from "@/hooks/useTempUnit";
+import { useAirQuality } from "@/hooks/useAirQuality";
 import CurrentWeather from "./sections/CurrentWeather";
 import WeatherDetails from "./sections/WeatherDetails";
 import Forecast from "./sections/Forecast";
@@ -59,6 +60,7 @@ export default function WeatherClient() {
   } = useCitySearch();
 
   const { tempUnit, setTempUnit, formatTemp } = useTempUnit();
+  const airQuality = useAirQuality(selectedCity);
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
   const theme = useTheme();
 
@@ -230,7 +232,7 @@ export default function WeatherClient() {
               tempUnit={tempUnit}
             />
 
-            <WeatherDetails weather={weather} />
+            <WeatherDetails weather={weather} airQuality={airQuality} />
 
             {weather.daily && (
               <Forecast

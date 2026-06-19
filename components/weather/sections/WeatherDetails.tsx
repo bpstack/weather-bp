@@ -2,6 +2,11 @@
 
 import { WeatherData } from "@/app/weather/services/weather-service";
 import {
+  AirQualityData,
+  getAqiLevel,
+  getPollenLevel,
+} from "@/app/weather/services/air-quality";
+import {
   Droplets,
   Wind,
   Cloud,
@@ -10,13 +15,16 @@ import {
   Eye,
   Sunrise,
   Sunset,
+  Leaf,
+  Factory,
 } from "lucide-react";
 
 interface Props {
   weather: WeatherData;
+  airQuality?: AirQualityData | null;
 }
 
-export default function WeatherDetails({ weather }: Props) {
+export default function WeatherDetails({ weather, airQuality }: Props) {
   const details = [
     {
       icon: Droplets,
@@ -74,6 +82,26 @@ export default function WeatherDetails({ weather }: Props) {
     },
   ];
 
+  if (airQuality?.aqi != null) {
+    const level = getAqiLevel(airQuality.aqi);
+    details.push({
+      icon: Factory,
+      label: "Calidad aire",
+      value: `${Math.round(airQuality.aqi)} · ${level.label}`,
+      colorClass: level.colorClass,
+    });
+  }
+
+  if (airQuality?.pollenMax != null) {
+    const level = getPollenLevel(airQuality.pollenMax);
+    details.push({
+      icon: Leaf,
+      label: "Polen",
+      value: level.label,
+      colorClass: level.colorClass,
+    });
+  }
+
   return (
     <div className="py-6 border-t border-[rgba(0,0,0,0.06)] dark:border-[rgba(255,255,255,0.06)]">
       <h3
@@ -83,23 +111,23 @@ export default function WeatherDetails({ weather }: Props) {
         Detalles
       </h3>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-2.5">
         {details.map(({ icon: Icon, label, value, colorClass }) => (
           <div
             key={label}
-            className="glass-card p-4 flex flex-col gap-2"
+            className="glass-card p-4 sm:p-3.5 flex flex-col gap-2 sm:gap-1.5"
             style={{ borderRadius: 18 }}
           >
             <div className="flex items-center gap-1.5">
-              <Icon className={`w-4 h-4 ${colorClass}`} />
+              <Icon className={`w-4 h-4 sm:w-3.5 sm:h-3.5 ${colorClass}`} />
               <span
-                className="font-semibold text-text-tertiary uppercase"
-                style={{ fontSize: 11.5, letterSpacing: "0.09em" }}
+                className="font-semibold text-text-tertiary uppercase text-[11.5px] sm:text-[10.5px]"
+                style={{ letterSpacing: "0.09em" }}
               >
                 {label}
               </span>
             </div>
-            <span className="text-[21px] font-medium text-text-primary leading-none">
+            <span className="text-[21px] sm:text-[18px] font-medium text-text-primary leading-none">
               {value}
             </span>
           </div>
