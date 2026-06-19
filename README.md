@@ -16,9 +16,9 @@ pnpm lint       # catch issues
 ## What it does
 
 - **Real weather data** from Open-Meteo with 5-minute revalidation, null handling, and type-safe responses via Zod.
-- **Auto-detects location** on first load using browser geolocation + reverse geocoding (Nominatim). Falls back to a curated city list if the user denies permission.
+- **Location model**: on first visit (no city saved) it geolocates via browser geolocation + reverse geocoding (Nominatim). A **manually chosen** city is persisted to localStorage and wins on reload; GPS results are never persisted (recomputed each visit). The geolocation button re-detects your current location on demand.
 - **City search** via Open-Meteo's geocoding endpoint with debounce and continent filtering.
-- **Server-side first render** with client hydration via SWR—no duplicate fetches, instant fallback data, no focus revalidation waste.
+- **Client data fetching** via SWR with no focus revalidation waste; reconnect + hourly refresh enabled.
 - **Unit toggles**: Celsius/Fahrenheit, 7-day/16-day forecasts.
 - **Weather alerts** for rain and heat thresholds.
 - **Hourly carousel** showing 24h forecast with temps and precipitation.
@@ -54,12 +54,21 @@ All imported in `app/layout.tsx` alongside Analytics/SpeedInsights.
 ## Architecture
 
 ```
-app/weather/
-├── page.tsx           # Server entry: picks default city, fetches initial weather
-├── services/
-│   ├── weather-service.ts  # Zod schema, typed fetcher, URL builder
-│   ├── city-utils.ts       # Geolocation, popular cities, continent mapping
-│   └── weather-utils.tsx   # WMO code → icon/text mapping (28+ conditions)
+app/
+├── page.tsx                # Re-exports the weather page as the root route
+└── weather/
+    ├── page.tsx            # Thin entry: renders <WeatherClient/>
+    └── services/
+        ├── weather-service.ts  # Zod schema, typed fetcher, URL builder
+        ├── city-utils.ts       # Geolocation (Nominatim), popular cities, continent mapping
+        └── weather-utils.tsx   # WMO code → icon/text mapping (28+ conditions)
+```
+
+```
+hooks/
+├── useWeatherLocation.ts  # Selected city: stored-manual vs. geolocation, persistence
+├── useCitySearch.ts       # Debounced geocoding search + continent filter
+└── useTempUnit.ts         # Celsius/Fahrenheit preference, value conversion + formatting
 ```
 
 ```
@@ -90,15 +99,14 @@ Components stay small, focused, and testable. Services handle the messy stuff (f
 
 ## Data flow
 
-1. **Server render**: `app/weather/page.tsx` runs with `dynamic = "force-dynamic"` to skip stale cache, picks a popular city from `getPopularCities()`, and passes initial weather to the client shell.
-2. **Client hydration**: `WeatherClient.tsx` takes over, runs `useSWR` with the server data as fallback.
-3. **Geolocation**: On mount, attempts `navigator.geolocation.getCurrentPosition()` with 10s timeout + 5min cache. Reverse-geocodes via Nominatim. Falls back to server default if denied or unavailable.
-4. **Weather fetch**: SWR calls `fetchWeatherData()` which:
+1. **Entry**: `app/weather/page.tsx` just renders the client component `WeatherClient.tsx`. There is no server-side weather fetch.
+2. **Location resolution** (`useWeatherLocation`): on mount, if a manually-chosen city is in localStorage it is used as-is. Otherwise it calls `navigator.geolocation.getCurrentPosition()` (10s timeout, 5min cache) and reverse-geocodes via Nominatim. GPS results are applied to state but **not** persisted. While resolving, an initial skeleton is shown.
+3. **Weather fetch**: once a city is set, `WeatherClient` runs `useSWR(["weather", cityId, days])`. The fetcher calls `fetchWeather()` which:
    - Builds URL with lat/lon, current/hourly/daily blocks
    - Validates response against Zod schema
    - Normalizes nulls/numbers
    - Returns typed `WeatherData`
-5. **Revalidation**: SWR revalidates on focus (disabled), reconnect (enabled), and every hour via `refreshInterval`.
+4. **Revalidation**: focus revalidation is disabled; reconnect revalidation uses SWR defaults. Failed requests retry up to twice (5s apart), except on timeout/abort. Add a `refreshInterval` if you want periodic polling.
 
 Everything stays free-tier friendly—no API keys, no paid limits.
 
