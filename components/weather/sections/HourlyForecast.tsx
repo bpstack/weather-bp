@@ -8,7 +8,7 @@ import HourlyDetailModal from "./HourlyDetailModal";
 
 interface HourlyForecastProps {
   weather: WeatherData;
-  convertTemp: (temp: number | null) => string | number;
+  formatTemp: (temp: number | null) => string;
   tempUnit: "C" | "F";
 }
 
@@ -33,7 +33,7 @@ function hourIsNight(hour: number): boolean {
 
 export default function HourlyForecast({
   weather,
-  convertTemp,
+  formatTemp,
 }: HourlyForecastProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedHourIndex, setSelectedHourIndex] = useState<number | null>(null);
@@ -179,7 +179,7 @@ export default function HourlyForecast({
 
             {/* Temperature */}
             <span className="text-[15px] font-semibold text-text-primary">
-              {convertTemp(hour.temp)}°
+              {formatTemp(hour.temp)}°
             </span>
 
             {/* Precipitation */}
@@ -200,7 +200,7 @@ export default function HourlyForecast({
         <HourlyDetailModal
           weather={weather}
           hourIndex={selectedHourIndex}
-          convertTemp={convertTemp}
+          formatTemp={formatTemp}
           onClose={() => setSelectedHourIndex(null)}
         />
       )}

@@ -58,7 +58,7 @@ export default function WeatherClient() {
     continents,
   } = useCitySearch();
 
-  const { tempUnit, setTempUnit, convertTemp } = useTempUnit();
+  const { tempUnit, setTempUnit, formatTemp } = useTempUnit();
   const [forecastDays, setForecastDays] = useState<7 | 16>(7);
   const theme = useTheme();
 
@@ -221,12 +221,12 @@ export default function WeatherClient() {
               weather={weather}
               tempUnit={tempUnit}
               setTempUnit={handleTempUnitChange}
-              convertTemp={convertTemp}
+              formatTemp={formatTemp}
             />
 
             <HourlyForecast
               weather={weather}
-              convertTemp={convertTemp}
+              formatTemp={formatTemp}
               tempUnit={tempUnit}
             />
 
@@ -237,7 +237,7 @@ export default function WeatherClient() {
                 weather={weather}
                 forecastDays={forecastDays}
                 setForecastDays={setForecastDays}
-                convertTemp={convertTemp}
+                formatTemp={formatTemp}
               />
             )}
           </>

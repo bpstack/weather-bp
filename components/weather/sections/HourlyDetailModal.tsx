@@ -8,7 +8,7 @@ import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 interface HourlyDetailModalProps {
   weather: WeatherData;
   hourIndex: number;
-  convertTemp: (temp: number | null) => string | number;
+  formatTemp: (temp: number | null) => string;
   onClose: () => void;
 }
 
@@ -29,7 +29,7 @@ function hourIsNight(hour: number): boolean {
 export default function HourlyDetailModal({
   weather,
   hourIndex,
-  convertTemp,
+  formatTemp,
   onClose,
 }: HourlyDetailModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -70,8 +70,8 @@ export default function HourlyDetailModal({
   }, [onClose]);
 
   const details = [
-    { icon: Thermometer, label: "Temperatura", value: `${convertTemp(hourly.temperature_2m[hourIndex])}°`, colorClass: "text-text-tertiary" },
-    { icon: Thermometer, label: "Sensación", value: `${convertTemp(hourly.apparent_temperature[hourIndex])}°`, colorClass: "text-text-tertiary" },
+    { icon: Thermometer, label: "Temperatura", value: `${formatTemp(hourly.temperature_2m[hourIndex])}°`, colorClass: "text-text-tertiary" },
+    { icon: Thermometer, label: "Sensación", value: `${formatTemp(hourly.apparent_temperature[hourIndex])}°`, colorClass: "text-text-tertiary" },
     { icon: Droplets, label: "Humedad", value: `${hourly.relative_humidity_2m[hourIndex] ?? "-"}%`, colorClass: "text-rain" },
     { icon: Cloud, label: "Nubes", value: `${hourly.cloud_cover[hourIndex] ?? "-"}%`, colorClass: "text-text-tertiary" },
     {
@@ -138,10 +138,10 @@ export default function HourlyDetailModal({
           <div className="flex flex-col items-center py-5 gap-2">
             <WeatherIcon code={weatherCode} night={night} size={84} />
             <p className="font-extralight text-text-primary" style={{ fontSize: 52, letterSpacing: "-0.03em", lineHeight: 1 }}>
-              {convertTemp(hourly.temperature_2m[hourIndex])}°
+              {formatTemp(hourly.temperature_2m[hourIndex])}°
             </p>
             <p className="text-sm text-text-secondary">
-              Sensación {convertTemp(hourly.apparent_temperature[hourIndex])}°
+              Sensación {formatTemp(hourly.apparent_temperature[hourIndex])}°
             </p>
           </div>
 

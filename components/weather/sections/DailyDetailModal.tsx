@@ -9,7 +9,7 @@ import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 interface DailyDetailModalProps {
   weather: WeatherData;
   dayIndex: number;
-  convertTemp: (temp: number | null) => string | number;
+  formatTemp: (temp: number | null) => string;
   onClose: () => void;
 }
 
@@ -30,7 +30,7 @@ function formatDuration(seconds: number | null): string {
 export default function DailyDetailModal({
   weather,
   dayIndex,
-  convertTemp,
+  formatTemp,
   onClose,
 }: DailyDetailModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -68,8 +68,8 @@ export default function DailyDetailModal({
   }, [onClose]);
 
   const details = [
-    { icon: Thermometer, label: "Sensación máx.", value: `${convertTemp(daily.apparent_temperature_max[dayIndex])}°`, colorClass: "text-sun" },
-    { icon: Thermometer, label: "Sensación mín.", value: `${convertTemp(daily.apparent_temperature_min[dayIndex])}°`, colorClass: "text-rain" },
+    { icon: Thermometer, label: "Sensación máx.", value: `${formatTemp(daily.apparent_temperature_max[dayIndex])}°`, colorClass: "text-sun" },
+    { icon: Thermometer, label: "Sensación mín.", value: `${formatTemp(daily.apparent_temperature_min[dayIndex])}°`, colorClass: "text-rain" },
     {
       icon: Wind,
       label: "Viento máx.",
@@ -145,10 +145,10 @@ export default function DailyDetailModal({
             <WeatherIcon code={weatherCode ?? undefined} size={84} />
             <div className="flex items-baseline gap-2">
               <p className="font-extralight text-text-primary" style={{ fontSize: 52, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                {convertTemp(daily.temperature_2m_max[dayIndex])}°
+                {formatTemp(daily.temperature_2m_max[dayIndex])}°
               </p>
               <p className="text-xl text-text-tertiary">
-                / {convertTemp(daily.temperature_2m_min[dayIndex])}°
+                / {formatTemp(daily.temperature_2m_min[dayIndex])}°
               </p>
             </div>
             <p className="text-sm text-text-secondary">{weatherInfo.text}</p>

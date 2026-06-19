@@ -10,14 +10,14 @@ interface Props {
   weather: WeatherData;
   forecastDays: 7 | 16;
   setForecastDays: (d: 7 | 16) => void;
-  convertTemp: (t: number | null) => number | string;
+  formatTemp: (t: number | null) => string;
 }
 
 export default function Forecast({
   weather,
   forecastDays,
   setForecastDays,
-  convertTemp,
+  formatTemp,
 }: Props) {
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
@@ -110,14 +110,14 @@ export default function Forecast({
 
               {/* Min — 30px */}
               <span className="text-sm font-medium w-[30px] text-right flex-shrink-0" style={{ color: "var(--color-rain)" }}>
-                {convertTemp(dayMin)}°
+                {formatTemp(dayMin)}°
               </span>
 
               {/* Range bar — 64px */}
               <div
                 className="relative flex-shrink-0 rounded-full overflow-hidden"
                 style={{ width: 64, height: 5, background: "var(--color-layer-3)" }}
-                title={`${convertTemp(dayMin)}° – ${convertTemp(dayMax)}°`}
+                title={`${formatTemp(dayMin)}° – ${formatTemp(dayMax)}°`}
               >
                 <div
                   className="absolute top-0 bottom-0 rounded-full"
@@ -131,7 +131,7 @@ export default function Forecast({
 
               {/* Max — 30px */}
               <span className="text-sm font-medium w-[30px] text-left flex-shrink-0" style={{ color: "var(--color-sun)" }}>
-                {convertTemp(dayMax)}°
+                {formatTemp(dayMax)}°
               </span>
             </div>
           );
@@ -143,7 +143,7 @@ export default function Forecast({
         <DailyDetailModal
           weather={weather}
           dayIndex={selectedDayIndex}
-          convertTemp={convertTemp}
+          formatTemp={formatTemp}
           onClose={() => setSelectedDayIndex(null)}
         />
       )}

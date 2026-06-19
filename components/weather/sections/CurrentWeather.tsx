@@ -12,14 +12,14 @@ interface Props {
   weather: WeatherData;
   tempUnit: "C" | "F";
   setTempUnit: (unit: "C" | "F") => void;
-  convertTemp: (t: number | null) => number | string;
+  formatTemp: (t: number | null) => string;
 }
 
 export default function CurrentWeather({
   weather,
   tempUnit,
   setTempUnit,
-  convertTemp,
+  formatTemp,
 }: Props) {
   const weatherInfo = getWeatherInfo(weather.current.weather_code ?? null);
   const night = isNightTime(weather);
@@ -57,7 +57,7 @@ export default function CurrentWeather({
               className="font-extralight text-text-primary leading-none"
               style={{ fontSize: 84, letterSpacing: "-0.04em" }}
             >
-              {convertTemp(weather.current.temperature_2m)}
+              {formatTemp(weather.current.temperature_2m)}
             </span>
             <div className="flex flex-col gap-1 mt-2">
               {(["C", "F"] as const).map((u) => (
@@ -84,7 +84,7 @@ export default function CurrentWeather({
           {/* Feels like */}
           <p className="text-[13px] text-text-secondary flex items-center gap-1.5">
             <Thermometer className="w-3.5 h-3.5" />
-            Sensación térmica {convertTemp(weather.current.apparent_temperature)}°
+            Sensación térmica {formatTemp(weather.current.apparent_temperature)}°
           </p>
         </div>
 
