@@ -367,7 +367,7 @@ export async function getUserLocation(): Promise<GeolocationResponse> {
 
     const { latitude, longitude } = position.coords;
 
-    // Reverse geocoding using Open-Meteo's geocoding API
+    // Reverse geocoding using Nominatim (OpenStreetMap)
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=es`,
     );

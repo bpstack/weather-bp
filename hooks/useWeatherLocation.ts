@@ -20,13 +20,16 @@ function getStoredCity(): GeocodingCity | null {
 }
 
 export function useWeatherLocation() {
+  // Start null on both server and client to avoid hydration mismatch;
+  // the stored city / geolocation is resolved in the effect below.
   const [selectedCity, setSelectedCityState] = useState<GeocodingCity | null>(
-    () => getStoredCity(),
+    null,
   );
   const [isInitializing, setIsInitializing] = useState(true);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
+  // Manual selection: persisted so it survives reloads.
   const setSelectedCity = useCallback((city: GeocodingCity | null) => {
     setSelectedCityState(city);
     if (typeof window === "undefined") return;
@@ -37,6 +40,8 @@ export function useWeatherLocation() {
     }
   }, []);
 
+  // Geolocation: applied to state but NOT persisted — it is recomputed on
+  // every visit so a stale GPS city never gets "stuck".
   const requestGeolocation = useCallback(async () => {
     setIsLocating(true);
     setLocationError(null);
@@ -44,23 +49,24 @@ export function useWeatherLocation() {
     const result = await getUserLocation();
 
     if (result.city) {
-      setSelectedCity(result.city);
+      setSelectedCityState(result.city);
     } else if (result.error) {
       setLocationError(result.error);
     }
 
     setIsLocating(false);
     return result;
-  }, [setSelectedCity]);
+  }, []);
 
   useEffect(() => {
     const init = async () => {
+      // A manually-chosen city always wins on reload; skip geolocation.
       const stored = getStoredCity();
       if (stored) {
         setSelectedCityState(stored);
-        setIsInitializing(false);
+      } else {
+        await requestGeolocation();
       }
-      await requestGeolocation();
       setIsInitializing(false);
     };
     init();
