@@ -1,9 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-
-let _uid = 0;
-const nextId = () => `wx${++_uid}`;
+import { useId } from "react";
 
 interface SunProps {
   id: string;
@@ -290,7 +287,7 @@ export interface WeatherIconProps {
 }
 
 export function WeatherIcon({ code, condition, night = false, size = 64, style = {} }: WeatherIconProps) {
-  const id = useMemo(nextId, []);
+  const id = useId();
   const key = (condition as WeatherCondition) ?? codeToKey(code, night);
 
   let body: React.ReactNode;
