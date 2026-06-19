@@ -104,22 +104,6 @@ export async function fetchWeather({
     return arr.map((v) => (v === null || v === undefined ? fill : v));
   };
 
-  const normalizeHourlyProbability = (
-    arr: Array<number | null> | undefined,
-    fill = 0,
-  ) => {
-    if (!Array.isArray(arr)) return [] as number[];
-    return arr.map((v) => (v === null || v === undefined ? fill : v));
-  };
-
-  const normalizeHourlyPrecip = (
-    arr: Array<number | null> | undefined,
-    fill = 0,
-  ) => {
-    if (!Array.isArray(arr)) return [] as number[];
-    return arr.map((v) => (v === null || v === undefined ? fill : v));
-  };
-
   const safeJson = {
     ...json,
     hourly: {
@@ -131,10 +115,10 @@ export async function fetchWeather({
       apparent_temperature: normalizeHourlyNumbers(
         json.hourly?.apparent_temperature,
       ),
-      precipitation_probability: normalizeHourlyProbability(
+      precipitation_probability: normalizeHourlyNumbers(
         json.hourly?.precipitation_probability,
       ),
-      precipitation: normalizeHourlyPrecip(json.hourly?.precipitation),
+      precipitation: normalizeHourlyNumbers(json.hourly?.precipitation),
       weather_code: normalizeHourlyNumbers(json.hourly?.weather_code),
       cloud_cover: normalizeHourlyNumbers(json.hourly?.cloud_cover),
       wind_speed_10m: normalizeHourlyNumbers(json.hourly?.wind_speed_10m),
