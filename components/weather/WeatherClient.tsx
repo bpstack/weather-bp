@@ -200,7 +200,9 @@ export default function WeatherClient() {
         <CitySelector
           selectedCity={selectedCity}
           setShowCitySelector={setShowCitySelector}
-          onCitySelect={handleCitySelect}
+          onLocate={requestGeolocation}
+          isLocating={isLocating}
+          locationError={locationError}
         />
 
         {isLoading && <WeatherSkeleton />}

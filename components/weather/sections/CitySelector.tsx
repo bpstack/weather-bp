@@ -1,58 +1,46 @@
 "use client";
 
-import { useState } from "react";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
-import {
-  GeocodingCity,
-  getUserLocation,
-} from "@/app/weather/services/city-utils";
+import { GeocodingCity } from "@/app/weather/services/city-utils";
 
 interface Props {
   selectedCity: GeocodingCity;
   setShowCitySelector: (v: boolean) => void;
-  onCitySelect: (city: GeocodingCity) => void;
+  onLocate: () => void;
+  isLocating: boolean;
+  locationError: string | null;
 }
 
 export default function CitySelector({
   selectedCity,
   setShowCitySelector,
-  onCitySelect,
+  onLocate,
+  isLocating,
+  locationError,
 }: Props) {
-  const [isLocating, setIsLocating] = useState(false);
-  const [locationError, setLocationError] = useState<string | null>(null);
-
-  const handleGetLocation = async () => {
-    setIsLocating(true);
-    setLocationError(null);
-    const result = await getUserLocation();
-    if (result.error) {
-      setLocationError(result.error);
-      setIsLocating(false);
-      return;
-    }
-    if (result.city) onCitySelect(result.city);
-    setIsLocating(false);
-  };
-
   return (
     <div className="relative flex items-center justify-between py-4">
       {/* Location info */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <MapPin className="w-5 h-5 text-accent flex-shrink-0" />
-        <div>
-          <p className="font-semibold text-text-primary" style={{ fontSize: 22 }}>
+        <div className="min-w-0">
+          <p
+            className="font-semibold text-text-primary truncate"
+            style={{ fontSize: 22 }}
+            title={selectedCity.name}
+          >
             {selectedCity.name}
           </p>
-          <p className="text-text-tertiary" style={{ fontSize: 12.5 }}>
+          <p className="text-text-tertiary truncate" style={{ fontSize: 12.5 }}>
             {selectedCity.country}
           </p>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <button
-          onClick={handleGetLocation}
+          onClick={onLocate}
           disabled={isLocating}
           className="p-2.5 rounded-full text-text-tertiary hover:text-text-primary hover:bg-layer-2 transition-all disabled:opacity-50"
           aria-label="Usar mi ubicación"
