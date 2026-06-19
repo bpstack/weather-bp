@@ -6,12 +6,14 @@ const STORAGE_KEY_TEMP_UNIT = "weather-bp-temp-unit";
 
 function getStoredTempUnit(): "C" | "F" {
   if (typeof window === "undefined") return "C";
-  const stored = localStorage.getItem(STORAGE_KEY_TEMP_UNIT);
-  return stored === "F" ? "F" : "C";
+  return localStorage.getItem(STORAGE_KEY_TEMP_UNIT) === "F" ? "F" : "C";
 }
 
 export function useTempUnit() {
-  const [tempUnit, setTempUnitState] = useState<"C" | "F">(() => getStoredTempUnit());
+  // Lazy initializer reads the stored preference. This is hydration-safe here
+  // because tempUnit is only rendered after client-side data loads (the SSR
+  // pass shows a skeleton), so there is no server/client DOM mismatch.
+  const [tempUnit, setTempUnitState] = useState<"C" | "F">(getStoredTempUnit);
 
   const setTempUnit = useCallback((unit: "C" | "F") => {
     setTempUnitState(unit);
@@ -20,14 +22,25 @@ export function useTempUnit() {
     }
   }, []);
 
+  // Pure value conversion: returns the temperature as a number (or null when
+  // there is no data). No formatting/placeholder concerns here.
   const convertTemp = useCallback(
-    (temp: number | null): number | string => {
-      if (temp === null || temp === undefined) return "-";
+    (temp: number | null): number | null => {
+      if (temp === null || temp === undefined) return null;
       if (tempUnit === "F") return Math.round((temp * 9) / 5 + 32);
       return Math.round(temp);
     },
     [tempUnit],
   );
 
-  return { tempUnit, setTempUnit, convertTemp };
+  // Display formatting: returns a string token ("-" when no data).
+  const formatTemp = useCallback(
+    (temp: number | null): string => {
+      const value = convertTemp(temp);
+      return value === null ? "-" : String(value);
+    },
+    [convertTemp],
+  );
+
+  return { tempUnit, setTempUnit, convertTemp, formatTemp };
 }
