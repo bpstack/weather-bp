@@ -24,6 +24,9 @@ async function geocodingFetcher(query: string): Promise<GeocodingCity[]> {
     `${GEOCODING_API_URL}?name=${encodeURIComponent(query)}&count=50&language=es&format=json`,
     { signal: AbortSignal.timeout(5_000) },
   );
+  if (!res.ok) {
+    throw new Error("No se pudo buscar la ciudad");
+  }
   const data = await res.json();
   return (data.results || []).map((city: GeocodingCity) => ({
     ...city,
