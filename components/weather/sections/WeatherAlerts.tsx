@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import { AlertTriangle } from "lucide-react";
 
@@ -17,11 +18,56 @@ const THRESHOLDS = {
   snow: 71,
 };
 
+// Minimum precipitation (mm per 15-min slot) to consider it "raining".
+const RAIN_MM = 0.1;
+
 export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
   const alerts: { id: string; title: string; description: string }[] = [];
 
-  // Rain
+  // "Now" as state so render stays pure; refreshes each minute so the rain
+  // countdown stays accurate without remounting.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Nowcasting: when does rain start within the next hour? Uses the 15-min
+  // resolution block. Times are in the location's local zone, so we shift
+  // "now" by the location's UTC offset and treat both as UTC for comparison.
+  const nowcast = (() => {
+    const m15 = weather?.minutely_15;
+    if (!m15?.time?.length) return null;
+    const locationNow = now + (weather.utc_offset_seconds ?? 0) * 1000;
+    for (let i = 0; i < m15.time.length; i++) {
+      const slotMs = Date.parse(`${m15.time[i]}:00Z`);
+      if (Number.isNaN(slotMs)) continue;
+      const minutes = Math.round((slotMs - locationNow) / 60000);
+      if (minutes < 0 || minutes > 60) continue;
+      if ((m15.precipitation[i] ?? 0) >= RAIN_MM) {
+        return { minutes, amount: m15.precipitation[i] ?? 0 };
+      }
+    }
+    return null;
+  })();
+  // Only flag upcoming rain if it isn't already raining now.
+  const alreadyRaining = (weather?.current?.precipitation ?? 0) >= RAIN_MM;
+  const showNowcast = nowcast !== null && !alreadyRaining;
+  if (nowcast && showNowcast) {
+    const { minutes, amount } = nowcast;
+    alerts.push({
+      id: "nowcast",
+      title: minutes <= 5 ? "Lluvia inminente" : "Lluvia próxima",
+      description:
+        minutes <= 5
+          ? `En unos minutos · ~${amount.toFixed(1)} mm`
+          : `En ~${minutes} min · ~${amount.toFixed(1)} mm`,
+    });
+  }
+
+  // Rain (next 3h probability) — skipped if the more specific nowcast fired.
   const rainAlertData = (() => {
+    if (showNowcast) return null;
     if (!weather?.hourly?.precipitation_probability?.length) return null;
     const prob = weather.hourly.precipitation_probability.slice(0, 3).map((p) => p ?? 0);
     const precip = weather.hourly.precipitation?.slice(0, 3).map((p) => p ?? 0) ?? [];

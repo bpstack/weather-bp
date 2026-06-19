@@ -28,6 +28,12 @@ const weatherSchema = z.object({
     wind_direction_10m: z.array(z.number().nullable()),
     wind_gusts_10m: z.array(z.number().nullable()),
   }),
+  minutely_15: z
+    .object({
+      time: z.array(z.string()),
+      precipitation: z.array(z.number()),
+    })
+    .optional(),
   daily: z.object({
     time: z.array(z.string()),
     temperature_2m_max: z.array(z.number().nullable()),
@@ -79,7 +85,7 @@ export async function fetchWeather({
   country,
   days = 16,
 }: FetchWeatherArgs): Promise<WeatherData> {
-  const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,cloud_cover&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&forecast_days=${days}&timezone=auto`;
+  const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,cloud_cover&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&minutely_15=precipitation&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&forecast_days=${days}&timezone=auto`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
@@ -127,6 +133,14 @@ export async function fetchWeather({
       ),
       wind_gusts_10m: normalizeHourlyNumbers(json.hourly?.wind_gusts_10m),
     },
+    minutely_15: json.minutely_15
+      ? {
+          time: json.minutely_15.time ?? [],
+          precipitation: normalizeHourlyNumbers(
+            json.minutely_15.precipitation,
+          ),
+        }
+      : undefined,
     daily: {
       ...json.daily,
       temperature_2m_max: normalizeDaily(json.daily?.temperature_2m_max).map(
