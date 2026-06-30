@@ -13,6 +13,7 @@ import {
   Gauge,
   Zap,
   Eye,
+  CloudRain,
   Sunrise,
   Sunset,
   Leaf,
@@ -25,6 +26,13 @@ interface Props {
 }
 
 export default function WeatherDetails({ weather, airQuality }: Props) {
+  // Current visibility comes from the hourly series at the current hour.
+  const hourIdx = weather.hourly.time.findIndex(
+    (t) => t.slice(0, 13) === weather.current.time.slice(0, 13),
+  );
+  const visibilityM =
+    hourIdx >= 0 ? weather.hourly.visibility?.[hourIdx] : undefined;
+
   const details = [
     {
       icon: Droplets,
@@ -57,7 +65,7 @@ export default function WeatherDetails({ weather, airQuality }: Props) {
       colorClass: "text-sun",
     },
     {
-      icon: Eye,
+      icon: CloudRain,
       label: "Precipitación",
       value: `${weather.current.precipitation} mm`,
       colorClass: "text-rain",
@@ -67,7 +75,7 @@ export default function WeatherDetails({ weather, airQuality }: Props) {
       label: "Amanecer",
       value: new Date(weather.daily.sunrise?.[0] ?? "").toLocaleTimeString(
         "es-ES",
-        { hour: "2-digit", minute: "2-digit" }
+        { hour: "2-digit", minute: "2-digit" },
       ),
       colorClass: "text-sun",
     },
@@ -76,11 +84,23 @@ export default function WeatherDetails({ weather, airQuality }: Props) {
       label: "Atardecer",
       value: new Date(weather.daily.sunset?.[0] ?? "").toLocaleTimeString(
         "es-ES",
-        { hour: "2-digit", minute: "2-digit" }
+        { hour: "2-digit", minute: "2-digit" },
       ),
       colorClass: "text-sun",
     },
   ];
+
+  if (visibilityM != null) {
+    details.push({
+      icon: Eye,
+      label: "Visibilidad",
+      value:
+        visibilityM >= 1000
+          ? `${(visibilityM / 1000).toFixed(visibilityM >= 10000 ? 0 : 1)} km`
+          : `${Math.round(visibilityM)} m`,
+      colorClass: "text-text-tertiary",
+    });
+  }
 
   if (airQuality?.aqi != null) {
     const level = getAqiLevel(airQuality.aqi);

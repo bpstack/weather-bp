@@ -14,6 +14,7 @@ const weatherSchema = z.object({
     pressure_msl: z.number(),
     weather_code: z.number(),
     cloud_cover: z.number(),
+    is_day: z.number(),
   }),
   hourly: z.object({
     time: z.array(z.string()),
@@ -24,6 +25,7 @@ const weatherSchema = z.object({
     precipitation: z.array(z.number().nullable()),
     weather_code: z.array(z.number()),
     cloud_cover: z.array(z.number().nullable()),
+    visibility: z.array(z.number().nullable()),
     wind_speed_10m: z.array(z.number().nullable()),
     wind_direction_10m: z.array(z.number().nullable()),
     wind_gusts_10m: z.array(z.number().nullable()),
@@ -85,7 +87,7 @@ export async function fetchWeather({
   country,
   days = 16,
 }: FetchWeatherArgs): Promise<WeatherData> {
-  const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,cloud_cover&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&minutely_15=precipitation&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&forecast_days=${days}&timezone=auto`;
+  const url = `${BASE_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,pressure_msl,cloud_cover,is_day&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m&minutely_15=precipitation&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,weather_code,sunrise,sunset,daylight_duration,sunshine_duration,uv_index_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&forecast_days=${days}&timezone=auto`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
@@ -127,6 +129,7 @@ export async function fetchWeather({
       precipitation: normalizeHourlyNumbers(json.hourly?.precipitation),
       weather_code: normalizeHourlyNumbers(json.hourly?.weather_code),
       cloud_cover: normalizeHourlyNumbers(json.hourly?.cloud_cover),
+      visibility: normalizeHourlyNumbers(json.hourly?.visibility),
       wind_speed_10m: normalizeHourlyNumbers(json.hourly?.wind_speed_10m),
       wind_direction_10m: normalizeHourlyNumbers(
         json.hourly?.wind_direction_10m,
@@ -136,9 +139,7 @@ export async function fetchWeather({
     minutely_15: json.minutely_15
       ? {
           time: json.minutely_15.time ?? [],
-          precipitation: normalizeHourlyNumbers(
-            json.minutely_15.precipitation,
-          ),
+          precipitation: normalizeHourlyNumbers(json.minutely_15.precipitation),
         }
       : undefined,
     daily: {
@@ -149,8 +150,12 @@ export async function fetchWeather({
       temperature_2m_min: normalizeDaily(json.daily?.temperature_2m_min).map(
         (v) => fillNulls(v),
       ),
-      apparent_temperature_max: normalizeDaily(json.daily?.apparent_temperature_max),
-      apparent_temperature_min: normalizeDaily(json.daily?.apparent_temperature_min),
+      apparent_temperature_max: normalizeDaily(
+        json.daily?.apparent_temperature_max,
+      ),
+      apparent_temperature_min: normalizeDaily(
+        json.daily?.apparent_temperature_min,
+      ),
       weather_code: normalizeDaily(json.daily?.weather_code).map((v) =>
         fillNulls(v),
       ),
@@ -164,10 +169,14 @@ export async function fetchWeather({
       showers_sum: normalizeDaily(json.daily?.showers_sum),
       snowfall_sum: normalizeDaily(json.daily?.snowfall_sum),
       precipitation_hours: normalizeDaily(json.daily?.precipitation_hours),
-      precipitation_probability_max: normalizeDaily(json.daily?.precipitation_probability_max),
+      precipitation_probability_max: normalizeDaily(
+        json.daily?.precipitation_probability_max,
+      ),
       wind_speed_10m_max: normalizeDaily(json.daily?.wind_speed_10m_max),
       wind_gusts_10m_max: normalizeDaily(json.daily?.wind_gusts_10m_max),
-      wind_direction_10m_dominant: normalizeDaily(json.daily?.wind_direction_10m_dominant),
+      wind_direction_10m_dominant: normalizeDaily(
+        json.daily?.wind_direction_10m_dominant,
+      ),
     },
   };
 
