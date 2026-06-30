@@ -349,6 +349,72 @@ export interface GeolocationError {
 
 export type GeolocationResponse = GeolocationResult | GeolocationError;
 
+// Distance in km between two coordinates (haversine).
+export function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+// Reverse geocode coordinates into a GeocodingCity (Nominatim/OpenStreetMap).
+// Falls back to a coords-only "Mi ubicación" city when the lookup fails.
+export async function reverseGeocode(
+  latitude: number,
+  longitude: number,
+): Promise<GeocodingCity> {
+  const fallback: GeocodingCity = {
+    id: Date.now(),
+    name: "Mi ubicación",
+    latitude,
+    longitude,
+    country: "Desconocido",
+    country_code: "XX",
+    continent: "Otros",
+  };
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=es`,
+    );
+
+    if (!response.ok) return fallback;
+
+    const data = await response.json();
+    const address = data.address || {};
+
+    const cityName =
+      address.city ||
+      address.town ||
+      address.village ||
+      address.municipality ||
+      "Mi ubicación";
+    const country = address.country || "Desconocido";
+    const countryCode = (address.country_code || "XX").toUpperCase();
+
+    return {
+      id: Date.now(),
+      name: cityName,
+      latitude,
+      longitude,
+      country,
+      country_code: countryCode,
+      continent: getContinent(countryCode),
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 export async function getUserLocation(): Promise<GeolocationResponse> {
   if (!navigator.geolocation) {
     return { error: "Tu navegador no soporta geolocalización" };
@@ -366,50 +432,7 @@ export async function getUserLocation(): Promise<GeolocationResponse> {
     );
 
     const { latitude, longitude } = position.coords;
-
-    // Reverse geocoding using Nominatim (OpenStreetMap)
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=es`,
-    );
-
-    if (!response.ok) {
-      // Fallback: return coordinates without city name
-      return {
-        city: {
-          id: Date.now(),
-          name: "Mi ubicación",
-          latitude,
-          longitude,
-          country: "Desconocido",
-          country_code: "XX",
-          continent: "Otros",
-        },
-      };
-    }
-
-    const data = await response.json();
-    const address = data.address || {};
-
-    const cityName =
-      address.city ||
-      address.town ||
-      address.village ||
-      address.municipality ||
-      "Mi ubicación";
-    const country = address.country || "Desconocido";
-    const countryCode = (address.country_code || "XX").toUpperCase();
-
-    return {
-      city: {
-        id: Date.now(),
-        name: cityName,
-        latitude,
-        longitude,
-        country,
-        country_code: countryCode,
-        continent: getContinent(countryCode),
-      },
-    };
+    return { city: await reverseGeocode(latitude, longitude) };
   } catch (err) {
     const geoError = err as GeolocationPositionError;
     const isPWA =
