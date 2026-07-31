@@ -18,9 +18,27 @@ declare const self: WorkerGlobalScope;
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
+  // Sin esto, los precachés de versiones anteriores se quedan ocupando espacio
+  // en el dispositivo cada vez que se despliega una nueva.
+  precacheOptions: {
+    cleanupOutdatedCaches: true,
+  },
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
+  // Si una navegación falla y la ruta no está cacheada, NetworkFirst se queda
+  // sin nada que servir y el navegador muestra su propio error. Este fallback
+  // cubre ese hueco con una página propia.
+  fallbacks: {
+    entries: [
+      {
+        url: "/~offline",
+        matcher({ request }) {
+          return request.destination === "document";
+        },
+      },
+    ],
+  },
   runtimeCaching: [
     // API del clima - StaleWhileRevalidate con 30 minutos
     {
