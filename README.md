@@ -164,3 +164,7 @@ v6: Current - production PWA + monitoring       (shipping)
 Started as a blog example for understanding API calls. Became a production app because why not.
 
 Built to be read, tweaked, and enjoyed.
+
+## License
+
+[MIT](LICENSE) © 2026 [bpstack](https://stackbp.es)
