@@ -9,4 +9,3 @@ next-env.d.ts
 # Skill vendorizada de vercel-labs/agent-skills: se mantiene byte a byte como
 # upstream para que download_rules.sh no genere diffs. No formatear.
 .agents/
-.claude/skills/
