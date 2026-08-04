@@ -4,7 +4,7 @@ Dashboard del tiempo en **Next.js 16 (App Router) + React 19 + TypeScript**, sob
 gratuitas de **Open-Meteo** (predicción, geocoding, calidad del aire). Es una **PWA** instalable y
 offline-first mediante Serwist. En producción: [weather.stackbp.es](https://weather.stackbp.es).
 
-## Estado real del proyecto (verificado contra el árbol, 2026-07-27)
+## Estado real del proyecto (verificado contra el árbol, 2026-08-04)
 
 - **Sí hay tests.** 3 archivos en `__tests__/` con 17 tests (Vitest 4 + Testing Library + jsdom),
   y scripts `pnpm test` / `pnpm test:run`. Deben pasar antes de commitear. _(Este archivo afirmaba
@@ -15,6 +15,19 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
   en `content` por herencia de la plantilla, no porque exista.
 - Los servicios de datos están en `app/weather/services/`, los hooks en `hooks/`, y los
   componentes de presentación en `components/weather/`.
+
+### Qué del arnés viaja en el repo
+
+| Ruta                    | Versionado | Por qué                                                      |
+| ----------------------- | ---------- | ------------------------------------------------------------ |
+| `AGENTS.md`/`CLAUDE.md` | Sí         | Las convenciones son inútiles si no llegan a la otra máquina |
+| `.agents/skills/`       | Sí         | Skills en el formato agnóstico de agents.md                  |
+| `.claude/`              | No         | Permisos y estado locales. Su `skills/` duplica `.agents/`   |
+| `ROADMAP.md`, `TODO.md` | No         | Backlog y método de trabajo, privados                        |
+| `docs/`                 | No         | Privado                                                      |
+
+⚠️ `TODO.md` y `ROADMAP.md` no llegan al repo, así que **un agente en otra máquina no los ve**.
+No asumas que existen ni cites tareas de ellos en commits.
 
 ⚠️ **`pnpm build` deja el árbol sucio**: Serwist regenera `public/sw.js` en cada build. Es
 esperado, no es un cambio tuyo. **No lo cueles en un commit ajeno** — o se commitea a propósito
@@ -68,6 +81,7 @@ ser correcta, pero omiten las guardas de null y fallan el typecheck. Añade las 
 | `tailwindcss`  | **3.4.18**  | v3, ver trampas                                                 |
 | `vitest`       | **4.1.2**   | Con `jsdom` 29.0.1 y `@vitejs/plugin-react` 6                   |
 | `eslint`       | **9.39.1**  | Flat config en `eslint.config.mjs`                              |
+| `prettier`     | **3.9.6**   | Config en `.prettierrc` + `.prettierignore` (excluye `sw.js`)   |
 | `typescript`   | **5.9.3**   | `strict`                                                        |
 | `sharp`        | **0.34.5**  | Optimización de imágenes de Next                                |
 | `vite`         | 8.0.3       | Transitiva **de Vitest**, no del build de la app                |
@@ -105,23 +119,39 @@ de instalar y, si no da 24, selecciona la versión y usa **`corepack pnpm <scrip
 `pnpm` del PATH.
 
 ```bash
-pnpm install     # reproduce desde pnpm-lock.yaml
-pnpm dev         # localhost:3000
-pnpm lint        # eslint (flat config)
-pnpm test:run    # vitest en modo CI
-pnpm build       # producción (webpack, regenera public/sw.js)
+pnpm install       # reproduce desde pnpm-lock.yaml
+pnpm dev           # localhost:3000
+pnpm lint          # eslint (flat config)
+pnpm format        # prettier --write .
+pnpm format:check  # prettier --check . (falla si algo está sin formatear)
+pnpm test:run      # vitest en modo CI
+pnpm build         # producción (webpack, regenera public/sw.js)
 ```
 
-**Línea base medida con el árbol limpio (2026-07-27, Node 24.16.0):**
+**Línea base medida con el árbol limpio (2026-08-04, Node 24.16.0, pnpm 9.15.0):**
 
-| Comprobación    | Resultado                                                    |
-| --------------- | ------------------------------------------------------------ |
-| `pnpm lint`     | ✅ 0 problemas                                               |
-| `pnpm test:run` | ✅ 17 tests en 3 archivos, todos pasan (~20 s)               |
-| `pnpm build`    | ✅ verde, 4 rutas estáticas — deja `public/sw.js` modificado |
+| Comprobación        | Resultado                                                    |
+| ------------------- | ------------------------------------------------------------ |
+| `pnpm lint`         | ✅ 0 problemas                                               |
+| `pnpm format:check` | ✅ 0 archivos pendientes                                     |
+| `pnpm test:run`     | ✅ 17 tests en 3 archivos, todos pasan (~21 s)               |
+| `pnpm build`        | ✅ verde, 4 rutas estáticas — deja `public/sw.js` modificado |
 
-Dos avisos no bloqueantes y preexistentes: `caniuse-lite` con 7 meses de antigüedad y
+Dos avisos no bloqueantes y preexistentes: `caniuse-lite` con 8 meses de antigüedad y
 `baseline-browser-mapping` con más de dos. No los arregles dentro de otra tarea.
+
+### Seguridad de dependencias (`.npmrc`)
+
+`ignore-scripts=true` bloquea los scripts pre/post-install del registry. Las excepciones se
+declaran **una a una** en `package.json > pnpm.onlyBuiltDependencies`; hoy solo está **`sharp`**,
+que necesita su postinstall para los binarios de libvips. Si añades una dependencia que falle al
+instalar por falta de postinstall, **no quites `ignore-scripts`**: añádela a esa allowlist y
+justifícalo.
+
+`save-exact=true`: las dependencias nuevas entran sin `^`.
+
+⚠️ `minimum-release-age` y `block-exotic-subdeps` están escritos en el `.npmrc` pero **inertes
+con pnpm 9.15** (requieren 10.16 y 10.18). No los des por activos.
 
 ## Convenciones de código
 
@@ -130,8 +160,9 @@ Dos avisos no bloqueantes y preexistentes: `caniuse-lite` con 7 meses de antigü
 - App Router: prefiere Server Components para obtener datos; marca los de cliente con `'use client'`.
 - Orden de imports: react/next primero, luego third-party, luego alias `@/`, luego relativos.
   Sin imports sin usar.
-- Formato: los defaults del repo (Next/ESLint), indentación de 2 espacios, líneas concisas, props
-  multilínea cuando son largas.
+- Formato: **Prettier** (`.prettierrc`: comillas dobles, `trailingComma: all`, `printWidth: 80`,
+  2 espacios). `pnpm format` antes de commitear; `pnpm format:check` debe pasar. No pelees con el
+  formateador a mano.
 - Tipos: TS estricto; evita `any`; tipa las respuestas de API; valida con Zod lo que venga de fuera.
 - Nombres: PascalCase para componentes y archivos de `components/`, camelCase para funciones y
   variables, CONSTANT_CASE para valores tipo entorno.
