@@ -9,6 +9,12 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
     css: false,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["app/weather/services/**", "hooks/**", "components/**"],
+      exclude: ["**/*.d.ts", "**/icons/**"],
+    },
   },
   resolve: {
     alias: {

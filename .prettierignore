@@ -1,5 +1,6 @@
 .next/
 node_modules/
+coverage/
 pnpm-lock.yaml
 public/sw.js
 public/sw.js.map
