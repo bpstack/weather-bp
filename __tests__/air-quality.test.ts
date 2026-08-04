@@ -189,6 +189,18 @@ describe("getAqiLevel", () => {
   });
 });
 
+describe("getAqiLevel — adversarial input", () => {
+  // The API types european_aqi as nullable but never negative. If a bad
+  // reading ever got through, "Buena" would be actively misleading.
+  it.fails("should not report a negative AQI as good air", () => {
+    expect(getAqiLevel(-10).label).not.toBe("Buena");
+  });
+
+  it("does not throw on NaN", () => {
+    expect(() => getAqiLevel(NaN)).not.toThrow();
+  });
+});
+
 describe("getPollenLevel", () => {
   // Note these bands are exclusive (<), unlike the AQI ones (<=).
   it.each([
