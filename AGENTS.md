@@ -6,7 +6,7 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
 
 ## Estado real del proyecto (verificado contra el árbol, 2026-08-04)
 
-- **Sí hay tests.** 7 archivos en `__tests__/` con 95 tests (Vitest 4 + Testing Library + jsdom),
+- **Sí hay tests.** 8 archivos en `__tests__/` con 109 tests (Vitest 4 + Testing Library + jsdom),
   y scripts `pnpm test` / `pnpm test:run` / `pnpm test:coverage`. Deben pasar antes de commitear.
   Fixture compartido de `WeatherData` en `__tests__/fixtures/weather.ts`: úsalo en vez de
   construir objetos a mano. _(Este archivo afirmaba
@@ -137,8 +137,8 @@ pnpm build         # producción (webpack, regenera public/sw.js)
 | -------------------- | ------------------------------------------------------------ |
 | `pnpm lint`          | ✅ 0 problemas                                               |
 | `pnpm format:check`  | ✅ 0 archivos pendientes                                     |
-| `pnpm test:run`      | ✅ 95 tests en 7 archivos, todos pasan (~5 s)                |
-| `pnpm test:coverage` | ✅ 40,9 % sentencias · 34,4 % ramas                          |
+| `pnpm test:run`      | ✅ 109 tests en 8 archivos (107 pasan + 2 `it.fails`)        |
+| `pnpm test:coverage` | ✅ 46,3 % sentencias · 36,9 % ramas                          |
 | `pnpm build`         | ✅ verde, 4 rutas estáticas — deja `public/sw.js` modificado |
 
 Dos avisos no bloqueantes y preexistentes: `caniuse-lite` con 8 meses de antigüedad y
@@ -181,6 +181,11 @@ con pnpm 9.15** (requieren 10.16 y 10.18). No los des por activos.
 - Rendimiento: aprovecha el caché/revalidate de Next para Open-Meteo; evita JS de cliente
   innecesario para datos estáticos.
 - Tests: junto al módulo o en `__tests__`; deterministas; mockea la red.
+- **Escribe la expectativa desde cómo _debería_ comportarse el código, no desde lo que hace.**
+  Si falla, es un hallazgo: repórtalo, no ajustes la expectativa para que pase.
+- Defecto conocido y no arreglado → `it.fails()` con comentario explicando el fallo y dónde se
+  ve. Mantiene la suite verde y avisa sola: al arreglar el bug el test se pone rojo y hay que
+  pasarlo a `it()`. **No borres un `it.fails()` para "arreglar" la suite.**
 - Dependencias: librerías ligeras; si añades gráficos o animación, tree-shake y carga diferida.
 - Documentación: actualiza el README cuando cambien setup, comandos o variables de entorno.
 - i18n: centraliza las traducciones si se añaden; nada de literales sueltos.
