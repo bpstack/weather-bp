@@ -9,6 +9,11 @@ import InstallPrompt from "./components/InstallPrompt";
 import ErrorMonitor from "./components/ErrorMonitor";
 import "./globals.css";
 
+// Google Analytics measurement ID. Not a secret — it ships to every browser —
+// but keeping it in an env var means a fork or a local build does not report
+// into someone else's property. Unset (dev, forks) simply skips the scripts.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -70,18 +75,22 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
-        <Script
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-FND85JTFN4"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
+        {GA_ID && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-FND85JTFN4');
+            gtag('config', '${GA_ID}');
           `}
-        </Script>
+            </Script>
+          </>
+        )}
         <ErrorMonitor />
         <ServiceWorkerRegister />
         <UpdateNotification />

@@ -11,7 +11,29 @@ pnpm install    # deps
 pnpm dev        # local at localhost:3000
 pnpm build      # production build (--webpack for Serwist)
 pnpm lint       # catch issues
+pnpm typecheck  # tsc --noEmit (lint does NOT typecheck)
+pnpm test:run   # vitest, CI mode
+pnpm format     # prettier
 ```
+
+No configuration is required: every weather API used here is free and keyless.
+
+## Environment variables
+
+All optional — the app runs fine without them. Copy `.env.example` to
+`.env.local` if you want any.
+
+| Variable            | What it does                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_GA_ID` | Google Analytics measurement ID (`G-XXXXXXXXXX`). Unset ⇒ the GA scripts are skipped |
+
+`NEXT_PUBLIC_GA_ID` is not a secret — it ships to the browser in the HTML. It
+lives in an env var so a fork or a local build does not report into someone
+else's property.
+
+> **Deploying:** `NEXT_PUBLIC_*` variables are inlined at build time, so this
+> one must be set in the hosting provider **before** building. If it is
+> missing, analytics stops silently — the app itself is unaffected.
 
 ## What it does
 
@@ -125,7 +147,7 @@ Everything stays free-tier friendly—no API keys, no paid limits.
 
 - **Theming**: `darkMode: "class"` with CSS variables in `app/globals.css`. Use semantic classes like `bg-layer-1`, `text-text-secondary`—no hardcoded hex.
 - **Imports order**: React/Next → third-party → `@/` aliases → relative. No unused imports.
-- **Secrets**: Keep them server-side. No `.env` needed for Open-Meteo (it's free).
+- **Secrets**: Keep them server-side. No `.env` needed for Open-Meteo (it's free). The only variable is `NEXT_PUBLIC_GA_ID` — see [Environment variables](#environment-variables).
 - **Accessibility**: Semantic HTML, `aria-label` on icon buttons, focus-visible states.
 - **Build quirk**: `pnpm build --webpack` because Serwist doesn't support Turbopack yet. Handled in `package.json` scripts.
 
