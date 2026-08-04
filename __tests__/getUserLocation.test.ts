@@ -164,22 +164,64 @@ describe("getUserLocation", () => {
       expect(error).toBe("No se pudo obtener la ubicación");
     });
 
-    // A rejection that is not a GeolocationPositionError has no `code` and no
-    // PERMISSION_DENIED constant, so both sides of the first case are
-    // undefined and the switch matches it. Blaming the user's permissions for
-    // an unrelated crash sends them to change a setting that was never wrong.
-    it.fails(
-      "should not blame permissions for a non-geolocation failure",
-      async () => {
-        stubGeolocation(() => {
-          throw new TypeError("boom");
-        });
+    // Regression guard. A rejection that is not a GeolocationPositionError
+    // has no `code` and no PERMISSION_DENIED constant; reading the codes off
+    // the caught value made switch(undefined) match the first case and blame
+    // the user's permissions for an unrelated crash.
+    it("does not blame permissions for a non-geolocation failure", async () => {
+      stubGeolocation(() => {
+        throw new TypeError("boom");
+      });
 
-        const { error } = await getUserLocation();
+      const { error } = await getUserLocation();
 
-        expect(error).not.toContain("Permiso denegado");
-      },
-    );
+      expect(error).toBe("No se pudo obtener la ubicación");
+    });
+
+    it("does not blame permissions when the rejection is a plain Error", async () => {
+      stubGeolocation((_ok, fail) =>
+        fail(new Error("nope") as unknown as GeolocationPositionError),
+      );
+
+      const { error } = await getUserLocation();
+
+      expect(error).toBe("No se pudo obtener la ubicación");
+    });
+
+    it("does not blame permissions when the rejection is null", async () => {
+      stubGeolocation((_ok, fail) =>
+        fail(null as unknown as GeolocationPositionError),
+      );
+
+      const { error } = await getUserLocation();
+
+      expect(error).toBe("No se pudo obtener la ubicación");
+    });
+
+    // A structured-clone or polyfilled error keeps `code` but loses the
+    // instance constants. Classifying against those constants would compare
+    // 1 against undefined and fall through to the generic message, so the
+    // codes are matched against the standard numeric values instead.
+    it("classifies by code even when the error lacks the constants", async () => {
+      stubGeolocation((_ok, fail) =>
+        fail({ code: 1 } as GeolocationPositionError),
+      );
+
+      const { error } = await getUserLocation();
+
+      expect(error).toContain("Permiso denegado");
+    });
+
+    it("still classifies a real error whose code is 0", async () => {
+      // Guarding on `typeof code === "number"` must not reject a falsy 0.
+      stubGeolocation((_ok, fail) =>
+        fail(geoError(0) as GeolocationPositionError),
+      );
+
+      const { error } = await getUserLocation();
+
+      expect(error).toBe("No se pudo obtener la ubicación");
+    });
   });
 });
 

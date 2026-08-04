@@ -415,6 +415,20 @@ export async function reverseGeocode(
   }
 }
 
+// Standard GeolocationPositionError codes. Reading them off the caught value
+// instead is unsafe: anything that is not a GeolocationPositionError has
+// neither `code` nor these constants, so `switch (undefined)` matches
+// `case undefined` — the first branch — and blames the user's permissions.
+const GEOLOCATION_ERROR = {
+  PERMISSION_DENIED: 1,
+  POSITION_UNAVAILABLE: 2,
+  TIMEOUT: 3,
+} as const;
+
+function isGeolocationError(err: unknown): err is GeolocationPositionError {
+  return typeof (err as GeolocationPositionError | null)?.code === "number";
+}
+
 export async function getUserLocation(): Promise<GeolocationResponse> {
   if (!navigator.geolocation) {
     return { error: "Tu navegador no soporta geolocalización" };
@@ -434,24 +448,29 @@ export async function getUserLocation(): Promise<GeolocationResponse> {
     const { latitude, longitude } = position.coords;
     return { city: await reverseGeocode(latitude, longitude) };
   } catch (err) {
-    const geoError = err as GeolocationPositionError;
+    // Anything that is not a geolocation failure (a bug in this block, a
+    // TypeError…) must not be dressed up as a permissions problem.
+    if (!isGeolocationError(err)) {
+      return { error: "No se pudo obtener la ubicación" };
+    }
+
     const isPWA =
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as Navigator & { standalone?: boolean }).standalone ===
         true;
 
-    switch (geoError.code) {
-      case geoError.PERMISSION_DENIED:
+    switch (err.code) {
+      case GEOLOCATION_ERROR.PERMISSION_DENIED:
         return {
           error: isPWA
             ? "Permiso denegado. Ve a Ajustes > Apps > Weather App > Permisos > Ubicación para activarlo."
             : "Permiso denegado. Haz clic en el icono de candado en la barra de direcciones para activar la ubicación.",
         };
-      case geoError.POSITION_UNAVAILABLE:
+      case GEOLOCATION_ERROR.POSITION_UNAVAILABLE:
         return {
           error: "Ubicación no disponible. Verifica que el GPS esté activado.",
         };
-      case geoError.TIMEOUT:
+      case GEOLOCATION_ERROR.TIMEOUT:
         return { error: "Tiempo de espera agotado. Intenta de nuevo." };
       default:
         return { error: "No se pudo obtener la ubicación" };
