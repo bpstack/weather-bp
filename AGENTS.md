@@ -22,7 +22,8 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
 | ----------------------- | ---------- | ------------------------------------------------------------ |
 | `AGENTS.md`/`CLAUDE.md` | Sí         | Las convenciones son inútiles si no llegan a la otra máquina |
 | `.agents/skills/`       | Sí         | Skills en el formato agnóstico de agents.md                  |
-| `.claude/`              | No         | Permisos y estado locales. Su `skills/` duplica `.agents/`   |
+| `.claude/skills/`       | Sí         | Arnés del proyecto: las skills que usa Claude Code           |
+| `.claude/settings.*`    | No         | Permisos locales de la máquina                               |
 | `ROADMAP.md`, `TODO.md` | No         | Backlog y método de trabajo, privados                        |
 | `docs/`                 | No         | Privado                                                      |
 
