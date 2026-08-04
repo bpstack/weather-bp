@@ -23,13 +23,39 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
 | Ruta                    | Versionado | Por qué                                                      |
 | ----------------------- | ---------- | ------------------------------------------------------------ |
 | `AGENTS.md`/`CLAUDE.md` | Sí         | Las convenciones son inútiles si no llegan a la otra máquina |
-| `.agents/skills/`       | Sí         | Skills en el formato agnóstico de agents.md                  |
-| `.claude/`              | No         | Local. La skill versionada es la de `.agents/skills/`        |
+| `.agents/`, `.claude/`  | No         | Skills de terceros y estado local. Ver abajo                 |
 | `ROADMAP.md`, `TODO.md` | No         | Backlog y método de trabajo, privados                        |
 | `docs/`                 | No         | Privado                                                      |
 
 ⚠️ `TODO.md` y `ROADMAP.md` no llegan al repo, así que **un agente en otra máquina no los ve**.
 No asumas que existen ni cites tareas de ellos en commits.
+
+⚠️ `CLAUDE.md` es solo `@AGENTS.md`. **Este archivo es la única fuente**: no dupliques reglas
+allí, o los dos textos divergen (ya pasó: durante meses este archivo afirmaba que no había tests).
+
+### Skills de agente
+
+No se versionan. Son documentación de terceros, se reinstalan en un comando y meterlas en el
+repo añadía 4.270 líneas ajenas a un proyecto público sin aportar nada propio.
+
+```bash
+npx autoskills   # detecta el stack e instala las skills; https://www.autoskills.sh
+```
+
+Instalada hoy: **`react-best-practices`** — guía de rendimiento de React/Next con 40+ reglas.
+Autoría **Vercel Labs** (`vercel-labs/agent-skills`), licencia MIT. Autoskills la sirve desde su
+registro con verificación SHA-256 en vez de descargarla del upstream directamente.
+
+Rutas que lee cada herramienta (verificado contra el binario de opencode 1.18.12):
+
+| Herramienta | Lee                                                      |
+| ----------- | -------------------------------------------------------- |
+| Claude Code | `.claude/skills/`                                        |
+| opencode    | `.agents/skills/`, `.claude/skills/`, `.opencode/skill/` |
+
+Es decir: **opencode encuentra la skill en cualquiera de las dos carpetas**; Claude Code solo en
+`.claude/skills/`. Si tras clonar el repo en otra máquina un agente sugiere patrones de React que
+no cuadran con el proyecto, es que la skill no está instalada — ejecuta el comando de arriba.
 
 ⚠️ **`pnpm build` deja el árbol sucio**: Serwist regenera `public/sw.js` en cada build. Es
 esperado, no es un cambio tuyo. **No lo cueles en un commit ajeno** — o se commitea a propósito
