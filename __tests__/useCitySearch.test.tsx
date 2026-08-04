@@ -185,32 +185,47 @@ describe("useCitySearch", () => {
   });
 
   describe("feedback while the debounce is pending", () => {
-    // KNOWN DEFECT — expected to fail until the hook is fixed.
-    //
-    // Between the 3rd keystroke and the end of the 300 ms debounce,
-    // searchQuery is long enough but debouncedQuery is still empty, so the
-    // SWR key is null: searchLoading is false and filteredCities is [].
-    // CityModal reads that combination (CityModal.tsx:174-183) as
-    // "No se encontraron ciudades" — it tells the user there are no matches
-    // before having asked. It should show a loading state instead.
-    //
-    // it.fails() keeps this red-flagged without breaking the suite: the day
-    // the hook is fixed, this test starts failing and must be flipped to it().
-    it.fails(
-      "should not report 'no results' before the request has gone out",
-      async () => {
-        stubGeocoding([city("Madrid")]);
-        const { result } = renderHook(() => useCitySearch(), { wrapper });
+    // Regression guard. Between the 3rd keystroke and the end of the 300 ms
+    // debounce there is no request yet; if searchLoading were false here the
+    // empty list would render as "No se encontraron ciudades"
+    // (CityModal.tsx:174-184), telling the user there are no matches before
+    // having asked.
+    it("does not report 'no results' before the request has gone out", async () => {
+      stubGeocoding([city("Madrid")]);
+      const { result } = renderHook(() => useCitySearch(), { wrapper });
 
-        await typeQuery(result.current.setSearchQuery, "mad");
+      await typeQuery(result.current.setSearchQuery, "mad");
 
-        const looksLikeNoResults =
-          result.current.filteredCities.length === 0 &&
-          result.current.searchLoading === false;
+      const looksLikeNoResults =
+        result.current.filteredCities.length === 0 &&
+        result.current.searchLoading === false;
 
-        expect(looksLikeNoResults).toBe(false);
-      },
-    );
+      expect(looksLikeNoResults).toBe(false);
+    });
+
+    it("reports loading during the debounce and stops once results arrive", async () => {
+      stubGeocoding([city("Madrid")]);
+      const { result } = renderHook(() => useCitySearch(), { wrapper });
+
+      await typeQuery(result.current.setSearchQuery, "mad");
+      expect(result.current.searchLoading).toBe(true);
+
+      await act(async () => {
+        vi.advanceTimersByTime(300);
+      });
+
+      await waitFor(() => expect(result.current.searchLoading).toBe(false));
+      expect(result.current.filteredCities).toHaveLength(1);
+    });
+
+    it("is not loading while the query is still too short", async () => {
+      stubGeocoding();
+      const { result } = renderHook(() => useCitySearch(), { wrapper });
+
+      await typeQuery(result.current.setSearchQuery, "ma");
+
+      expect(result.current.searchLoading).toBe(false);
+    });
   });
 
   describe("resetSearch", () => {

@@ -54,11 +54,18 @@ export function useCitySearch() {
     };
   }, [searchQuery]);
 
-  const { data: searchResults = [], isLoading: searchLoading } = useSWR(
+  const { data: searchResults = [], isLoading: fetching } = useSWR(
     debouncedQuery.length >= 3 ? ["geocode", debouncedQuery] : null,
     () => geocodingFetcher(debouncedQuery),
     { revalidateOnFocus: false, dedupingInterval: 1000 },
   );
+
+  // The query is already long enough but the debounce has not elapsed, so no
+  // request exists yet. Without this the UI sees an empty list and no loading
+  // state, and reports "no results" before having asked.
+  const debouncePending =
+    searchQuery.length >= 3 && debouncedQuery !== searchQuery;
+  const searchLoading = fetching || debouncePending;
 
   const filteredCities = useMemo(() => {
     const base = searchQuery.length >= 3 ? searchResults : popularCities;

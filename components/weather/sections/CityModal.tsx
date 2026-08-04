@@ -177,9 +177,11 @@ export default function CityModal({
               <p className="text-sm">
                 {searchQuery.length > 0 && searchQuery.length < 3
                   ? "Escribe al menos 3 letras"
-                  : searchQuery.length >= 3
-                    ? "No se encontraron ciudades"
-                    : "Escribe para buscar una ciudad"}
+                  : searchLoading
+                    ? "Buscando ciudades…"
+                    : searchQuery.length >= 3
+                      ? "No se encontraron ciudades"
+                      : "Escribe para buscar una ciudad"}
               </p>
             </div>
           ) : (
