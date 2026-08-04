@@ -2,24 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
+import {
+  ALERT_THRESHOLDS as THRESHOLDS,
+  RAIN_MM,
+  NOWCAST_IMMINENT_MIN,
+  NOWCAST_WINDOW_MIN,
+} from "@/app/weather/config/alert-thresholds";
 import { AlertTriangle } from "lucide-react";
 
 interface WeatherAlertsProps {
   weather: WeatherData;
 }
-
-const THRESHOLDS = {
-  rain: 30,
-  heat: 35,
-  cold: 5,
-  wind: 30,
-  uv: 8,
-  storm: 95,
-  snow: 71,
-};
-
-// Minimum precipitation (mm per 15-min slot) to consider it "raining".
-const RAIN_MM = 0.1;
 
 export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
   const alerts: { id: string; title: string; description: string }[] = [];
@@ -43,7 +36,7 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
       const slotMs = Date.parse(`${m15.time[i]}:00Z`);
       if (Number.isNaN(slotMs)) continue;
       const minutes = Math.round((slotMs - locationNow) / 60000);
-      if (minutes < 0 || minutes > 60) continue;
+      if (minutes < 0 || minutes > NOWCAST_WINDOW_MIN) continue;
       if ((m15.precipitation[i] ?? 0) >= RAIN_MM) {
         return { minutes, amount: m15.precipitation[i] ?? 0 };
       }
@@ -57,9 +50,10 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
     const { minutes, amount } = nowcast;
     alerts.push({
       id: "nowcast",
-      title: minutes <= 5 ? "Lluvia inminente" : "Lluvia próxima",
+      title:
+        minutes <= NOWCAST_IMMINENT_MIN ? "Lluvia inminente" : "Lluvia próxima",
       description:
-        minutes <= 5
+        minutes <= NOWCAST_IMMINENT_MIN
           ? `En unos minutos · ~${amount.toFixed(1)} mm`
           : `En ~${minutes} min · ~${amount.toFixed(1)} mm`,
     });
@@ -114,7 +108,7 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
   if (
     weatherCode != null &&
     weatherCode >= THRESHOLDS.snow &&
-    weatherCode <= 77
+    weatherCode <= THRESHOLDS.snowMax
   ) {
     alerts.push({ id: "snow", title: "Nevando", description: "Activo" });
   }
