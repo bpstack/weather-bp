@@ -6,7 +6,7 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
 
 ## Estado real del proyecto (verificado contra el árbol, 2026-08-04)
 
-- **Sí hay tests.** 8 archivos en `__tests__/` con 111 tests (Vitest 4 + Testing Library + jsdom),
+- **Sí hay tests.** 10 archivos en `__tests__/` con 135 tests (Vitest 4 + Testing Library + jsdom),
   y scripts `pnpm test` / `pnpm test:run` / `pnpm test:coverage`. Deben pasar antes de commitear.
   Fixture compartido de `WeatherData` en `__tests__/fixtures/weather.ts`: úsalo en vez de
   construir objetos a mano. _(Este archivo afirmaba
@@ -123,7 +123,8 @@ de instalar y, si no da 24, selecciona la versión y usa **`corepack pnpm <scrip
 ```bash
 pnpm install       # reproduce desde pnpm-lock.yaml
 pnpm dev           # localhost:3000
-pnpm lint          # eslint (flat config)
+pnpm lint          # eslint (flat config) — ⚠️ NO hace typecheck
+pnpm typecheck     # tsc --noEmit; un error de tipos pasa `lint` limpio
 pnpm format        # prettier --write .
 pnpm format:check  # prettier --check . (falla si algo está sin formatear)
 pnpm test:run      # vitest en modo CI
@@ -136,9 +137,10 @@ pnpm build         # producción (webpack, regenera public/sw.js)
 | Comprobación         | Resultado                                                    |
 | -------------------- | ------------------------------------------------------------ |
 | `pnpm lint`          | ✅ 0 problemas                                               |
+| `pnpm typecheck`     | ✅ 0 errores                                                 |
 | `pnpm format:check`  | ✅ 0 archivos pendientes                                     |
-| `pnpm test:run`      | ✅ 111 tests en 8 archivos (110 pasan + 1 `it.fails`)        |
-| `pnpm test:coverage` | ✅ 46,5 % sentencias · 37,2 % ramas                          |
+| `pnpm test:run`      | ✅ 135 tests en 10 archivos (133 pasan + 2 `it.fails`)       |
+| `pnpm test:coverage` | ✅ 48,1 % sentencias · 39,7 % ramas                          |
 | `pnpm build`         | ✅ verde, 4 rutas estáticas — deja `public/sw.js` modificado |
 
 Dos avisos no bloqueantes y preexistentes: `caniuse-lite` con 8 meses de antigüedad y
