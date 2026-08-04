@@ -27,7 +27,7 @@ function Sun({ id, cx = 50, cy = 50, r = 17, rays = true }: SunProps) {
           stroke={`url(#${id}-ray)`}
           strokeWidth="3.4"
           strokeLinecap="round"
-        />
+        />,
       );
     }
   }
@@ -48,7 +48,13 @@ function Sun({ id, cx = 50, cy = 50, r = 17, rays = true }: SunProps) {
           <stop offset="100%" stopColor="#F5A01E" />
         </linearGradient>
       </defs>
-      <circle className="wx-glow" cx={cx} cy={cy} r={r + 13} fill={`url(#${id}-halo)`} />
+      <circle
+        className="wx-glow"
+        cx={cx}
+        cy={cy}
+        r={r + 13}
+        fill={`url(#${id}-halo)`}
+      />
       {rays && (
         /* transform-origin + transform-box required so rays rotate around sun center, not SVG origin */
         <g
@@ -72,7 +78,13 @@ function Sun({ id, cx = 50, cy = 50, r = 17, rays = true }: SunProps) {
           transformBox: "view-box" as React.CSSProperties["transformBox"],
         }}
       />
-      <circle cx={cx - r * 0.32} cy={cy - r * 0.36} r={r * 0.42} fill="#FFFBEB" opacity="0.5" />
+      <circle
+        cx={cx - r * 0.32}
+        cy={cy - r * 0.36}
+        r={r * 0.42}
+        fill="#FFFBEB"
+        opacity="0.5"
+      />
     </g>
   );
 }
@@ -97,7 +109,13 @@ function Moon({ id, cx = 50, cy = 48, r = 16 }: MoonProps) {
           <stop offset="100%" stopColor="#DCE3F2" />
         </linearGradient>
       </defs>
-      <circle className="wx-glow" cx={cx} cy={cy} r={r + 11} fill={`url(#${id}-mhalo)`} />
+      <circle
+        className="wx-glow"
+        cx={cx}
+        cy={cy}
+        r={r + 11}
+        fill={`url(#${id}-mhalo)`}
+      />
       <g className="wx-pulse">
         <path
           d={`M ${cx + r * 0.55} ${cy - r} a ${r} ${r} 0 1 0 ${r * 0.02} ${r * 2} a ${r * 0.82} ${r * 0.82} 0 1 1 ${-r * 0.02} ${-r * 2} Z`}
@@ -119,11 +137,18 @@ interface CloudProps {
   className?: string;
 }
 
-function Cloud({ id, x = 50, y = 58, scale = 1, tone = "light", className = "wx-drift" }: CloudProps) {
+function Cloud({
+  id,
+  x = 50,
+  y = 58,
+  scale = 1,
+  tone = "light",
+  className = "wx-drift",
+}: CloudProps) {
   const tones: Record<CloudTone, [string, string]> = {
     light: ["#FDFEFF", "#D7DEEA"],
-    grey:  ["#E2E7F0", "#AFB9CC"],
-    dark:  ["#9AA6BC", "#6E7A93"],
+    grey: ["#E2E7F0", "#AFB9CC"],
+    dark: ["#9AA6BC", "#6E7A93"],
     storm: ["#7E8AA3", "#515C76"],
   };
   const [c1, c2] = tones[tone];
@@ -149,7 +174,14 @@ function Cloud({ id, x = 50, y = 58, scale = 1, tone = "light", className = "wx-
           <circle cx="0" cy="-9" r="15" />
           <circle cx="15" cy="1" r="11" />
         </g>
-        <ellipse cx="0" cy="-5" rx="13" ry="5.5" fill="#FFFFFF" opacity="0.26" />
+        <ellipse
+          cx="0"
+          cy="-5"
+          rx="13"
+          ry="5.5"
+          fill="#FFFFFF"
+          opacity="0.26"
+        />
       </g>
     </g>
   );
@@ -263,7 +295,10 @@ export type WeatherCondition =
   | "snow"
   | "thunder";
 
-export function codeToKey(code: number | undefined | null, night: boolean): WeatherCondition {
+export function codeToKey(
+  code: number | undefined | null,
+  night: boolean,
+): WeatherCondition {
   if (code == null) return "cloudy";
   if (code === 0) return night ? "clear-night" : "clear-day";
   if (code <= 2) return night ? "partly-night" : "partly-day";
@@ -286,7 +321,13 @@ export interface WeatherIconProps {
   style?: React.CSSProperties;
 }
 
-export function WeatherIcon({ code, condition, night = false, size = 64, style = {} }: WeatherIconProps) {
+export function WeatherIcon({
+  code,
+  condition,
+  night = false,
+  size = 64,
+  style = {},
+}: WeatherIconProps) {
   const id = useId();
   const key = (condition as WeatherCondition) ?? codeToKey(code, night);
 
@@ -317,8 +358,22 @@ export function WeatherIcon({ code, condition, night = false, size = 64, style =
     case "cloudy":
       body = (
         <>
-          <Cloud id={id + "b"} x={61} y={42} scale={0.66} tone="grey" className="wx-drift" />
-          <Cloud id={id + "a"} x={47} y={56} scale={1} tone="light" className="wx-bob" />
+          <Cloud
+            id={id + "b"}
+            x={61}
+            y={42}
+            scale={0.66}
+            tone="grey"
+            className="wx-drift"
+          />
+          <Cloud
+            id={id + "a"}
+            x={47}
+            y={56}
+            scale={1}
+            tone="light"
+            className="wx-bob"
+          />
         </>
       );
       break;

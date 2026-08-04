@@ -1,8 +1,4 @@
-export function Skeleton({
-  className = "",
-}: {
-  className?: string;
-}) {
+export function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div
       className={`animate-pulse bg-layer-2 rounded-lg ${className}`}
@@ -58,7 +54,10 @@ export function WeatherSkeleton() {
         </div>
         <div className="flex gap-6">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="flex-shrink-0 flex flex-col items-center gap-3 min-w-[60px]">
+            <div
+              key={i}
+              className="flex-shrink-0 flex flex-col items-center gap-3 min-w-[60px]"
+            >
               <Skeleton className="h-4 w-10" />
               <Skeleton className="w-8 h-8 rounded-full" />
               <Skeleton className="h-4 w-8" />

@@ -21,10 +21,22 @@ export default function GlobalError({
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "28rem" }}>
-          <p style={{ fontSize: "1.125rem", fontWeight: 500, marginBottom: "0.5rem" }}>
+          <p
+            style={{
+              fontSize: "1.125rem",
+              fontWeight: 500,
+              marginBottom: "0.5rem",
+            }}
+          >
             Algo salió mal
           </p>
-          <p style={{ fontSize: "0.875rem", color: "#666", marginBottom: "1.5rem" }}>
+          <p
+            style={{
+              fontSize: "0.875rem",
+              color: "#666",
+              marginBottom: "1.5rem",
+            }}
+          >
             Se produjo un error crítico en la aplicación.
           </p>
           <button

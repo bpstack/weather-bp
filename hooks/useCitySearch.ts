@@ -37,7 +37,8 @@ async function geocodingFetcher(query: string): Promise<GeocodingCity[]> {
 export function useCitySearch() {
   const [showCitySelector, setShowCitySelector] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedContinent, setSelectedContinent] = useState("En todo el mundo");
+  const [selectedContinent, setSelectedContinent] =
+    useState("En todo el mundo");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const popularCities = useMemo(() => getPopularCities(), []);

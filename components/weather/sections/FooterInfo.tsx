@@ -50,7 +50,9 @@ export default function FooterInfo() {
             <span className="relative inline-block" aria-hidden="true">
               <span className="steam-waft absolute -top-2 left-[15%] w-[2px] h-2.5 rounded-full bg-text-tertiary opacity-0" />
               <span className="steam-waft absolute -top-2.5 left-[65%] w-[2px] h-3 rounded-full bg-text-tertiary opacity-0" />
-              <span className="text-sm inline-block transition-transform duration-300 group-hover:scale-125">☕</span>
+              <span className="text-sm inline-block transition-transform duration-300 group-hover:scale-125">
+                ☕
+              </span>
             </span>
             <span className="text-xs text-text-tertiary/60 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors duration-300">
               ¿Te ha servido? Apóyalo con un café

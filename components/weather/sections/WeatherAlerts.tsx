@@ -69,8 +69,11 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
   const rainAlertData = (() => {
     if (showNowcast) return null;
     if (!weather?.hourly?.precipitation_probability?.length) return null;
-    const prob = weather.hourly.precipitation_probability.slice(0, 3).map((p) => p ?? 0);
-    const precip = weather.hourly.precipitation?.slice(0, 3).map((p) => p ?? 0) ?? [];
+    const prob = weather.hourly.precipitation_probability
+      .slice(0, 3)
+      .map((p) => p ?? 0);
+    const precip =
+      weather.hourly.precipitation?.slice(0, 3).map((p) => p ?? 0) ?? [];
     const maxProb = Math.max(...prob);
     if (maxProb < THRESHOLDS.rain) return null;
     const maxIndex = prob.findIndex((p) => p === maxProb);
@@ -86,28 +89,52 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
 
   const tempC = weather?.current?.temperature_2m;
   if (tempC != null && tempC >= THRESHOLDS.heat) {
-    alerts.push({ id: "heat", title: "Calor extremo", description: `${Math.round(tempC)}°C` });
+    alerts.push({
+      id: "heat",
+      title: "Calor extremo",
+      description: `${Math.round(tempC)}°C`,
+    });
   }
   if (tempC != null && tempC <= THRESHOLDS.cold) {
-    alerts.push({ id: "cold", title: "Frío intenso", description: `${Math.round(tempC)}°C` });
+    alerts.push({
+      id: "cold",
+      title: "Frío intenso",
+      description: `${Math.round(tempC)}°C`,
+    });
   }
 
   const weatherCode = weather?.current?.weather_code;
   if (weatherCode != null && weatherCode >= THRESHOLDS.storm) {
-    alerts.push({ id: "storm", title: "Tormenta eléctrica", description: "Activa" });
+    alerts.push({
+      id: "storm",
+      title: "Tormenta eléctrica",
+      description: "Activa",
+    });
   }
-  if (weatherCode != null && weatherCode >= THRESHOLDS.snow && weatherCode <= 77) {
+  if (
+    weatherCode != null &&
+    weatherCode >= THRESHOLDS.snow &&
+    weatherCode <= 77
+  ) {
     alerts.push({ id: "snow", title: "Nevando", description: "Activo" });
   }
 
   const windSpeed = weather?.current?.wind_speed_10m;
   if (windSpeed != null && windSpeed >= THRESHOLDS.wind) {
-    alerts.push({ id: "wind", title: "Viento fuerte", description: `${Math.round(windSpeed)} km/h` });
+    alerts.push({
+      id: "wind",
+      title: "Viento fuerte",
+      description: `${Math.round(windSpeed)} km/h`,
+    });
   }
 
   const uvMax = weather?.daily?.uv_index_max?.[0];
   if (uvMax != null && uvMax >= THRESHOLDS.uv) {
-    alerts.push({ id: "uv", title: "UV extremo", description: `Índice ${Math.round(uvMax)}` });
+    alerts.push({
+      id: "uv",
+      title: "UV extremo",
+      description: `Índice ${Math.round(uvMax)}`,
+    });
   }
 
   if (alerts.length === 0) return null;
@@ -125,7 +152,9 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
           }}
         >
           <AlertTriangle className="w-4 h-4 flex-shrink-0 text-amber-500" />
-          <span className="font-medium text-amber-700 dark:text-amber-400">{alert.title}</span>
+          <span className="font-medium text-amber-700 dark:text-amber-400">
+            {alert.title}
+          </span>
           <span className="text-text-secondary">{alert.description}</span>
         </div>
       ))}

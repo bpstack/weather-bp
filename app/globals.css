@@ -212,10 +212,22 @@
   }
 
   @keyframes steam-rise {
-    0%   { opacity: 0; transform: translateY(2px) scaleX(1); }
-    30%  { opacity: 0.45; transform: translateY(-4px) scaleX(1.15); }
-    70%  { opacity: 0.2; transform: translateY(-9px) scaleX(0.85); }
-    100% { opacity: 0; transform: translateY(-14px) scaleX(1); }
+    0% {
+      opacity: 0;
+      transform: translateY(2px) scaleX(1);
+    }
+    30% {
+      opacity: 0.45;
+      transform: translateY(-4px) scaleX(1.15);
+    }
+    70% {
+      opacity: 0.2;
+      transform: translateY(-9px) scaleX(0.85);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-14px) scaleX(1);
+    }
   }
 
   .group:hover .steam-waft {
@@ -227,43 +239,160 @@
   }
 
   /* ── Weather icon animations ─────────────────────────────── */
-  @keyframes wx-spin  { to { transform: rotate(360deg); } }
-  @keyframes wx-pulse { 0%,100% { transform: scale(1); opacity:1 } 50% { transform: scale(1.06); opacity:.92 } }
-  @keyframes wx-glow  { 0%,100% { opacity:.55 } 50% { opacity:.85 } }
-  @keyframes wx-drift { 0%,100% { transform: translateX(0) } 50% { transform: translateX(2.5px) } }
-  @keyframes wx-bob   { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-1.8px) } }
-  @keyframes wx-rain  { 0% { transform: translateY(-3px); opacity:0 } 20% { opacity:1 } 80% { opacity:1 } 100% { transform: translateY(11px); opacity:0 } }
-  @keyframes wx-snow  { 0% { transform: translateY(-2px) translateX(0); opacity:0 } 25%{opacity:1} 75%{opacity:1} 100% { transform: translateY(11px) translateX(2px); opacity:0 } }
-  @keyframes wx-flash { 0%,55%,100% { opacity:1 } 60% { opacity:.25 } 65% { opacity:1 } 70%{opacity:.4} 75%{opacity:1} }
+  @keyframes wx-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes wx-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.06);
+      opacity: 0.92;
+    }
+  }
+  @keyframes wx-glow {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+  @keyframes wx-drift {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(2.5px);
+    }
+  }
+  @keyframes wx-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-1.8px);
+    }
+  }
+  @keyframes wx-rain {
+    0% {
+      transform: translateY(-3px);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(11px);
+      opacity: 0;
+    }
+  }
+  @keyframes wx-snow {
+    0% {
+      transform: translateY(-2px) translateX(0);
+      opacity: 0;
+    }
+    25% {
+      opacity: 1;
+    }
+    75% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(11px) translateX(2px);
+      opacity: 0;
+    }
+  }
+  @keyframes wx-flash {
+    0%,
+    55%,
+    100% {
+      opacity: 1;
+    }
+    60% {
+      opacity: 0.25;
+    }
+    65% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 0.4;
+    }
+    75% {
+      opacity: 1;
+    }
+  }
 
-  .wx-spin  { animation: wx-spin  26s  linear       infinite; transform-origin: center; }
-  .wx-pulse { animation: wx-pulse  4s  ease-in-out  infinite; transform-origin: center; }
-  .wx-glow  { animation: wx-glow   4s  ease-in-out  infinite; transform-origin: center; }
-  .wx-drift { animation: wx-drift  5s  ease-in-out  infinite; }
-  .wx-bob   { animation: wx-bob    4.5s ease-in-out infinite; }
-  .wx-flash { animation: wx-flash  3.5s ease-in-out infinite; }
-  .wx-drop  { animation: wx-rain   1.4s linear      infinite; }
-  .wx-flake { animation: wx-snow   2.6s ease-in-out infinite; }
+  .wx-spin {
+    animation: wx-spin 26s linear infinite;
+    transform-origin: center;
+  }
+  .wx-pulse {
+    animation: wx-pulse 4s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .wx-glow {
+    animation: wx-glow 4s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .wx-drift {
+    animation: wx-drift 5s ease-in-out infinite;
+  }
+  .wx-bob {
+    animation: wx-bob 4.5s ease-in-out infinite;
+  }
+  .wx-flash {
+    animation: wx-flash 3.5s ease-in-out infinite;
+  }
+  .wx-drop {
+    animation: wx-rain 1.4s linear infinite;
+  }
+  .wx-flake {
+    animation: wx-snow 2.6s ease-in-out infinite;
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .wx-spin, .wx-pulse, .wx-glow, .wx-drift,
-    .wx-bob,  .wx-flash, .wx-drop, .wx-flake {
+    .wx-spin,
+    .wx-pulse,
+    .wx-glow,
+    .wx-drift,
+    .wx-bob,
+    .wx-flash,
+    .wx-drop,
+    .wx-flake {
       animation: none !important;
     }
   }
 
   /* ── Bottom-sheet modal ──────────────────────────────────── */
   @keyframes wx-sheet-in {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
   @media (max-width: 639px) {
     .wx-sheet {
-      animation: wx-sheet-in 320ms cubic-bezier(.22, 1, .36, 1) forwards;
+      animation: wx-sheet-in 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .wx-sheet { animation: none !important; }
+    .wx-sheet {
+      animation: none !important;
+    }
   }
 
   /* ── Glass card ──────────────────────────────────────────── */

@@ -115,13 +115,15 @@ export default function CityModal({
             />
             {searchLoading ? (
               <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-text-tertiary" />
-            ) : searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-layer-3 transition-colors"
-              >
-                <X className="w-4 h-4 text-text-tertiary" />
-              </button>
+            ) : (
+              searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-layer-3 transition-colors"
+                >
+                  <X className="w-4 h-4 text-text-tertiary" />
+                </button>
+              )
             )}
           </div>
 
@@ -140,7 +142,9 @@ export default function CityModal({
                 ? selectedContinent
                 : "Filtrar por continente"}
             </span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`}
+            />
           </button>
 
           {showFilters && (
@@ -181,7 +185,9 @@ export default function CityModal({
           ) : (
             <div className="space-y-1">
               {searchQuery.length < 3 && (
-                <p className="text-xs text-text-tertiary mb-2 px-1">Ciudades populares</p>
+                <p className="text-xs text-text-tertiary mb-2 px-1">
+                  Ciudades populares
+                </p>
               )}
               {filteredCities.map((city) => (
                 <button
@@ -193,9 +199,12 @@ export default function CityModal({
                     <MapPin className="w-4 h-4 text-text-tertiary group-hover:text-accent" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-text-primary truncate">{city.name}</p>
+                    <p className="font-medium text-text-primary truncate">
+                      {city.name}
+                    </p>
                     <p className="text-sm text-text-tertiary truncate">
-                      {city.admin1 && `${city.admin1}, `}{city.country}
+                      {city.admin1 && `${city.admin1}, `}
+                      {city.country}
                     </p>
                   </div>
                 </button>

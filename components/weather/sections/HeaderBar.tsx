@@ -14,7 +14,10 @@ function HeaderBar({ weather }: HeaderProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-subtle">
       <div className="max-w-4xl mx-auto px-3 sm:px-6">
         {/* 3-column grid prevents center element from overlapping sides */}
-        <div className="grid h-14" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
+        <div
+          className="grid h-14"
+          style={{ gridTemplateColumns: "1fr auto 1fr" }}
+        >
           {/* Left: brand */}
           <Link
             href="https://stackbp.es/"
@@ -40,7 +43,8 @@ function HeaderBar({ weather }: HeaderProps) {
                 className="w-1.5 h-1.5 rounded-full wx-glow"
                 style={{
                   background: "var(--color-live)",
-                  boxShadow: "0 0 0 3px color-mix(in srgb, var(--color-live) 22%, transparent)",
+                  boxShadow:
+                    "0 0 0 3px color-mix(in srgb, var(--color-live) 22%, transparent)",
                 }}
               />
               {weather ? "Live" : "···"}

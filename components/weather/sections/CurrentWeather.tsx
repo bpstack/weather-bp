@@ -84,17 +84,14 @@ export default function CurrentWeather({
           {/* Feels like */}
           <p className="text-[13px] text-text-secondary flex items-center gap-1.5">
             <Thermometer className="w-3.5 h-3.5" />
-            Sensación térmica {formatTemp(weather.current.apparent_temperature)}°
+            Sensación térmica {formatTemp(weather.current.apparent_temperature)}
+            °
           </p>
         </div>
 
         {/* Right: animated weather icon 118px */}
         <div className="flex-shrink-0 pt-1">
-          <WeatherIcon
-            condition={conditionKey}
-            night={night}
-            size={118}
-          />
+          <WeatherIcon condition={conditionKey} night={night} size={118} />
         </div>
       </div>
 
@@ -104,7 +101,9 @@ export default function CurrentWeather({
           <div key={label} className="flex flex-col items-center gap-1">
             <Icon className={`w-4 h-4 ${colorClass}`} />
             <span className="text-[11px] text-text-tertiary">{label}</span>
-            <span className="text-sm font-medium text-text-primary">{value}</span>
+            <span className="text-sm font-medium text-text-primary">
+              {value}
+            </span>
           </div>
         ))}
       </div>

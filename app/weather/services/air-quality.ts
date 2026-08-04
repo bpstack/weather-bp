@@ -50,9 +50,9 @@ export async function fetchAirQuality({
   const json = await res.json();
   const { current } = airQualitySchema.parse(json);
 
-  const pollenValues = POLLEN_FIELDS.map(
-    (f) => current[f],
-  ).filter((v): v is number => typeof v === "number");
+  const pollenValues = POLLEN_FIELDS.map((f) => current[f]).filter(
+    (v): v is number => typeof v === "number",
+  );
 
   return {
     aqi: current.european_aqi,
@@ -63,7 +63,10 @@ export async function fetchAirQuality({
 }
 
 // European AQI bands (0–100+).
-export function getAqiLevel(aqi: number): { label: string; colorClass: string } {
+export function getAqiLevel(aqi: number): {
+  label: string;
+  colorClass: string;
+} {
   if (aqi <= 20) return { label: "Buena", colorClass: "text-emerald-500" };
   if (aqi <= 40) return { label: "Aceptable", colorClass: "text-lime-500" };
   if (aqi <= 60) return { label: "Moderada", colorClass: "text-amber-500" };
@@ -73,9 +76,10 @@ export function getAqiLevel(aqi: number): { label: string; colorClass: string } 
 }
 
 // Generic pollen bands (grains/m³). Coarse but enough for a qualitative tile.
-export function getPollenLevel(
-  value: number,
-): { label: string; colorClass: string } {
+export function getPollenLevel(value: number): {
+  label: string;
+  colorClass: string;
+} {
   if (value < 10) return { label: "Bajo", colorClass: "text-emerald-500" };
   if (value < 30) return { label: "Moderado", colorClass: "text-amber-500" };
   if (value < 100) return { label: "Alto", colorClass: "text-orange-500" };

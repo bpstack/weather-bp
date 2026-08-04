@@ -24,8 +24,12 @@ export default function Forecast({
   const days = weather.daily.time.slice(0, forecastDays);
 
   // Compute week-level min/max for the range bar
-  const visibleMaxes = days.map((_, i) => weather.daily.temperature_2m_max[i] ?? 0);
-  const visibleMins = days.map((_, i) => weather.daily.temperature_2m_min[i] ?? 0);
+  const visibleMaxes = days.map(
+    (_, i) => weather.daily.temperature_2m_max[i] ?? 0,
+  );
+  const visibleMins = days.map(
+    (_, i) => weather.daily.temperature_2m_min[i] ?? 0,
+  );
   const weekMax = Math.max(...visibleMaxes);
   const weekMin = Math.min(...visibleMins);
   const weekSpan = weekMax - weekMin || 1;
@@ -60,10 +64,10 @@ export default function Forecast({
 
       {/* Range legend */}
       <p className="text-[11.5px] text-text-tertiary mb-4 leading-snug">
-        La barra indica el rango de cada día: {" "}
-        <span style={{ color: "var(--color-rain)" }}>mínima</span> a la izquierda,{" "}
-        <span style={{ color: "var(--color-sun)" }}>máxima</span> a la derecha,
-        comparado con toda la semana.
+        La barra indica el rango de cada día:{" "}
+        <span style={{ color: "var(--color-rain)" }}>mínima</span> a la
+        izquierda, <span style={{ color: "var(--color-sun)" }}>máxima</span> a
+        la derecha, comparado con toda la semana.
       </p>
 
       {/* Forecast list in a glass card */}
@@ -83,24 +87,36 @@ export default function Forecast({
               key={date}
               onClick={() => setSelectedDayIndex(i)}
               className={`flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-white/30 dark:hover:bg-white/[0.04] transition-colors ${
-                i !== 0 ? "border-t border-[rgba(0,0,0,0.05)] dark:border-[rgba(255,255,255,0.05)]" : ""
+                i !== 0
+                  ? "border-t border-[rgba(0,0,0,0.05)] dark:border-[rgba(255,255,255,0.05)]"
+                  : ""
               }`}
             >
               {/* Day name + date — 38px fixed */}
               <div className="w-[38px] flex-shrink-0">
-                <p className={`text-sm ${isToday ? "font-semibold" : "font-medium"} text-text-primary leading-tight`}>
+                <p
+                  className={`text-sm ${isToday ? "font-semibold" : "font-medium"} text-text-primary leading-tight`}
+                >
                   {isToday
                     ? "Hoy"
-                    : new Date(date).toLocaleDateString("es-ES", { weekday: "short" })}
+                    : new Date(date).toLocaleDateString("es-ES", {
+                        weekday: "short",
+                      })}
                 </p>
                 <p className="text-[10px] text-text-tertiary">
-                  {new Date(date).toLocaleDateString("es-ES", { day: "numeric", month: "short" })}
+                  {new Date(date).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "short",
+                  })}
                 </p>
               </div>
 
               {/* Icon — 34px */}
               <div className="flex-shrink-0">
-                <WeatherIcon code={weather.daily.weather_code[i] ?? undefined} size={34} />
+                <WeatherIcon
+                  code={weather.daily.weather_code[i] ?? undefined}
+                  size={34}
+                />
               </div>
 
               {/* Description — flexible, truncated */}
@@ -109,14 +125,21 @@ export default function Forecast({
               </p>
 
               {/* Min — 30px */}
-              <span className="text-sm font-medium w-[30px] text-right flex-shrink-0" style={{ color: "var(--color-rain)" }}>
+              <span
+                className="text-sm font-medium w-[30px] text-right flex-shrink-0"
+                style={{ color: "var(--color-rain)" }}
+              >
                 {formatTemp(dayMin)}°
               </span>
 
               {/* Range bar — 64px */}
               <div
                 className="relative flex-shrink-0 rounded-full overflow-hidden"
-                style={{ width: 64, height: 5, background: "var(--color-layer-3)" }}
+                style={{
+                  width: 64,
+                  height: 5,
+                  background: "var(--color-layer-3)",
+                }}
                 title={`${formatTemp(dayMin)}° – ${formatTemp(dayMax)}°`}
               >
                 <div
@@ -130,7 +153,10 @@ export default function Forecast({
               </div>
 
               {/* Max — 30px */}
-              <span className="text-sm font-medium w-[30px] text-left flex-shrink-0" style={{ color: "var(--color-sun)" }}>
+              <span
+                className="text-sm font-medium w-[30px] text-left flex-shrink-0"
+                style={{ color: "var(--color-sun)" }}
+              >
                 {formatTemp(dayMax)}°
               </span>
             </div>

@@ -55,13 +55,18 @@ export default function UpdateNotification() {
             </svg>
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-sm mb-1">Nueva versión disponible</h3>
-            <p className={`text-xs text-white/90 ${SHOW_REINSTALL_TIP ? "mb-2" : "mb-3"}`}>
+            <h3 className="font-semibold text-sm mb-1">
+              Nueva versión disponible
+            </h3>
+            <p
+              className={`text-xs text-white/90 ${SHOW_REINSTALL_TIP ? "mb-2" : "mb-3"}`}
+            >
               Actualiza para obtener las últimas mejoras.
             </p>
             {SHOW_REINSTALL_TIP && (
               <p className="text-xs text-white/70 mb-3">
-                Para cambios visuales completos, reinstala la app (eliminar y añadir de nuevo).
+                Para cambios visuales completos, reinstala la app (eliminar y
+                añadir de nuevo).
               </p>
             )}
             <div className="flex gap-2">

@@ -12,9 +12,12 @@ export default function ServiceWorkerRegister() {
     ) {
       const registerSW = async () => {
         try {
-          const registration = await navigator.serviceWorker.register("/sw.js", {
-            scope: "/",
-          });
+          const registration = await navigator.serviceWorker.register(
+            "/sw.js",
+            {
+              scope: "/",
+            },
+          );
 
           console.log(
             "[SW] Service Worker registrado correctamente:",

@@ -108,7 +108,10 @@ export default function InstallPrompt() {
     setShowIOSInstructions(false);
     setDismissed(true);
     localStorage.setItem(STORAGE_KEY_DISMISSED, "true");
-    track("pwa_install", { outcome: "dismissed", platform: isIOS ? "ios" : "android" });
+    track("pwa_install", {
+      outcome: "dismissed",
+      platform: isIOS ? "ios" : "android",
+    });
   }, [isIOS]);
 
   const handleCloseIOSModal = useCallback(() => {
@@ -191,8 +194,8 @@ export default function InstallPrompt() {
                   Para instalar esta app necesitas usar Safari.
                 </p>
                 <p>
-                  Abre esta misma URL en Safari y sigue las instrucciones
-                  de instalación.
+                  Abre esta misma URL en Safari y sigue las instrucciones de
+                  instalación.
                 </p>
               </div>
             ) : (
@@ -208,9 +211,7 @@ export default function InstallPrompt() {
                     </span>
                     <span className="pt-0.5">
                       Pulsa el botón{" "}
-                      <strong className="text-[#007AFF]">
-                        Compartir
-                      </strong>{" "}
+                      <strong className="text-[#007AFF]">Compartir</strong>{" "}
                       <svg
                         className="inline w-4 h-4 text-[#007AFF]"
                         fill="none"

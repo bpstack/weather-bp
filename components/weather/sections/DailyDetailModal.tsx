@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Droplets, Wind, Thermometer, X, Sun, Sunrise, Sunset } from "lucide-react";
+import {
+  Droplets,
+  Wind,
+  Thermometer,
+  X,
+  Sun,
+  Sunrise,
+  Sunset,
+} from "lucide-react";
 import { WeatherData } from "@/app/weather/services/weather-service";
 import { getWeatherInfo } from "@/app/weather/services/weather-utils";
 import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
@@ -68,8 +76,18 @@ export default function DailyDetailModal({
   }, [onClose]);
 
   const details = [
-    { icon: Thermometer, label: "Sensación máx.", value: `${formatTemp(daily.apparent_temperature_max[dayIndex])}°`, colorClass: "text-sun" },
-    { icon: Thermometer, label: "Sensación mín.", value: `${formatTemp(daily.apparent_temperature_min[dayIndex])}°`, colorClass: "text-rain" },
+    {
+      icon: Thermometer,
+      label: "Sensación máx.",
+      value: `${formatTemp(daily.apparent_temperature_max[dayIndex])}°`,
+      colorClass: "text-sun",
+    },
+    {
+      icon: Thermometer,
+      label: "Sensación mín.",
+      value: `${formatTemp(daily.apparent_temperature_min[dayIndex])}°`,
+      colorClass: "text-rain",
+    },
     {
       icon: Wind,
       label: "Viento máx.",
@@ -77,16 +95,44 @@ export default function DailyDetailModal({
       colorClass: "text-text-tertiary",
       sub: windDirection(windDeg),
     },
-    { icon: Wind, label: "Ráfagas máx.", value: `${Math.round(daily.wind_gusts_10m_max[dayIndex] ?? 0)} km/h`, colorClass: "text-text-tertiary" },
-    { icon: Droplets, label: "Precipitación", value: `${daily.precipitation_sum[dayIndex] ?? 0} mm`, colorClass: "text-rain" },
-    { icon: Droplets, label: "Prob. lluvia", value: `${daily.precipitation_probability_max[dayIndex] ?? 0}%`, colorClass: "text-rain" },
-    { icon: Droplets, label: "Horas de lluvia", value: `${daily.precipitation_hours[dayIndex] ?? 0} h`, colorClass: "text-rain" },
-    { icon: Sun, label: "Índice UV", value: `${Math.round(daily.uv_index_max[dayIndex] ?? 0)}`, colorClass: "text-sun" },
+    {
+      icon: Wind,
+      label: "Ráfagas máx.",
+      value: `${Math.round(daily.wind_gusts_10m_max[dayIndex] ?? 0)} km/h`,
+      colorClass: "text-text-tertiary",
+    },
+    {
+      icon: Droplets,
+      label: "Precipitación",
+      value: `${daily.precipitation_sum[dayIndex] ?? 0} mm`,
+      colorClass: "text-rain",
+    },
+    {
+      icon: Droplets,
+      label: "Prob. lluvia",
+      value: `${daily.precipitation_probability_max[dayIndex] ?? 0}%`,
+      colorClass: "text-rain",
+    },
+    {
+      icon: Droplets,
+      label: "Horas de lluvia",
+      value: `${daily.precipitation_hours[dayIndex] ?? 0} h`,
+      colorClass: "text-rain",
+    },
+    {
+      icon: Sun,
+      label: "Índice UV",
+      value: `${Math.round(daily.uv_index_max[dayIndex] ?? 0)}`,
+      colorClass: "text-sun",
+    },
     {
       icon: Sunrise,
       label: "Amanecer",
       value: daily.sunrise[dayIndex]
-        ? new Date(daily.sunrise[dayIndex]!).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(daily.sunrise[dayIndex]!).toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
         : "-",
       colorClass: "text-sun",
     },
@@ -94,16 +140,32 @@ export default function DailyDetailModal({
       icon: Sunset,
       label: "Atardecer",
       value: daily.sunset[dayIndex]
-        ? new Date(daily.sunset[dayIndex]!).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(daily.sunset[dayIndex]!).toLocaleTimeString("es-ES", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
         : "-",
       colorClass: "text-sun",
     },
-    { icon: Sun, label: "Horas de sol", value: formatDuration(daily.sunshine_duration[dayIndex]), colorClass: "text-sun" },
-    { icon: Sun, label: "Horas de luz", value: formatDuration(daily.daylight_duration[dayIndex]), colorClass: "text-sun" },
+    {
+      icon: Sun,
+      label: "Horas de sol",
+      value: formatDuration(daily.sunshine_duration[dayIndex]),
+      colorClass: "text-sun",
+    },
+    {
+      icon: Sun,
+      label: "Horas de luz",
+      value: formatDuration(daily.daylight_duration[dayIndex]),
+      colorClass: "text-sun",
+    },
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center"
+      onClick={onClose}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default"
@@ -126,8 +188,12 @@ export default function DailyDetailModal({
         {/* Fixed header */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-border-subtle flex-shrink-0">
           <div>
-            <p className="text-lg font-semibold text-text-primary capitalize">{dayStr}</p>
-            <p className="text-sm text-text-tertiary">{dateStr} · {weatherInfo.text}</p>
+            <p className="text-lg font-semibold text-text-primary capitalize">
+              {dayStr}
+            </p>
+            <p className="text-sm text-text-tertiary">
+              {dateStr} · {weatherInfo.text}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -144,7 +210,14 @@ export default function DailyDetailModal({
           <div className="flex flex-col items-center py-5 gap-2">
             <WeatherIcon code={weatherCode ?? undefined} size={84} />
             <div className="flex items-baseline gap-2">
-              <p className="font-extralight text-text-primary" style={{ fontSize: 52, letterSpacing: "-0.03em", lineHeight: 1 }}>
+              <p
+                className="font-extralight text-text-primary"
+                style={{
+                  fontSize: 52,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
+                }}
+              >
                 {formatTemp(daily.temperature_2m_max[dayIndex])}°
               </p>
               <p className="text-xl text-text-tertiary">
@@ -169,7 +242,11 @@ export default function DailyDetailModal({
                     <p className="text-xs text-text-tertiary">{d.label}</p>
                     <p className="text-[15px] font-medium text-text-primary">
                       {d.value}
-                      {d.sub && <span className="text-xs text-text-tertiary ml-1">{d.sub}</span>}
+                      {d.sub && (
+                        <span className="text-xs text-text-tertiary ml-1">
+                          {d.sub}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>

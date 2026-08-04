@@ -8,12 +8,12 @@ const publicDir = join(__dirname, "../public");
 const svg = readFileSync(join(publicDir, "favicon.svg"));
 
 const sizes = [
-  { file: "favicon-16x16.png",             size: 16,  maskable: false },
-  { file: "con-16x16.png",                 size: 16,  maskable: false },
-  { file: "favicon-32x32.png",             size: 32,  maskable: false },
-  { file: "apple-touch-icon.png",          size: 180, maskable: false },
-  { file: "android-chrome-192x192.png",    size: 192, maskable: false },
-  { file: "android-chrome-512x512.png",    size: 512, maskable: false },
+  { file: "favicon-16x16.png", size: 16, maskable: false },
+  { file: "con-16x16.png", size: 16, maskable: false },
+  { file: "favicon-32x32.png", size: 32, maskable: false },
+  { file: "apple-touch-icon.png", size: 180, maskable: false },
+  { file: "android-chrome-192x192.png", size: 192, maskable: false },
+  { file: "android-chrome-512x512.png", size: 512, maskable: false },
   { file: "android-chrome-512x512-maskable.png", size: 512, maskable: true },
 ];
 
@@ -25,7 +25,9 @@ async function renderSvg(svgBuf, px, maskable) {
   const iconPx = maskable ? Math.round(px * 0.73) : px;
   const pad = maskable ? Math.round((px - iconPx) / 2) : 0;
 
-  const iconBuf = await sharp(svgBuf, { density: Math.round((iconPx / 64) * 72) })
+  const iconBuf = await sharp(svgBuf, {
+    density: Math.round((iconPx / 64) * 72),
+  })
     .resize(iconPx, iconPx)
     .png()
     .toBuffer();

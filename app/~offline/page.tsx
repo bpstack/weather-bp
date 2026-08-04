@@ -18,7 +18,9 @@ export default function OfflinePage() {
         This page could not be loaded because there is no connection. Weather
         you already looked up is still available.
       </p>
-      <p className="text-sm opacity-60">Try again once you&apos;re back online.</p>
+      <p className="text-sm opacity-60">
+        Try again once you&apos;re back online.
+      </p>
     </main>
   );
 }

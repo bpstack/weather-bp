@@ -36,7 +36,9 @@ export default function HourlyForecast({
   formatTemp,
 }: HourlyForecastProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [selectedHourIndex, setSelectedHourIndex] = useState<number | null>(null);
+  const [selectedHourIndex, setSelectedHourIndex] = useState<number | null>(
+    null,
+  );
 
   const hourlyData = weather?.hourly;
   const currentCode = weather?.current?.weather_code ?? 0;
@@ -66,37 +68,35 @@ export default function HourlyForecast({
     let startIndex = 0;
     if (currentTime) {
       const currentHourPrefix = currentTime.slice(0, 13);
-      startIndex = hourlyData.time.findIndex((time) =>
-        time.slice(0, 13) === currentHourPrefix
+      startIndex = hourlyData.time.findIndex(
+        (time) => time.slice(0, 13) === currentHourPrefix,
       );
       if (startIndex === -1) {
-        startIndex = hourlyData.time.findIndex((time) =>
-          time.slice(0, 13) > currentHourPrefix
+        startIndex = hourlyData.time.findIndex(
+          (time) => time.slice(0, 13) > currentHourPrefix,
         );
       }
     }
     if (startIndex === -1) startIndex = 0;
 
-    return hourlyData.time
-      .slice(startIndex, startIndex + 24)
-      .map((time, i) => {
-        const actualIndex = startIndex + i;
-        const hourStr = time.slice(11, 13);
-        const hour = parseInt(hourStr, 10);
-        const temp = hourlyData.temperature_2m[actualIndex];
-        const precipProb = hourlyData.precipitation_probability[actualIndex] ?? 0;
-        const weatherCode = getHourlyWeatherCode(precipProb, currentCode);
+    return hourlyData.time.slice(startIndex, startIndex + 24).map((time, i) => {
+      const actualIndex = startIndex + i;
+      const hourStr = time.slice(11, 13);
+      const hour = parseInt(hourStr, 10);
+      const temp = hourlyData.temperature_2m[actualIndex];
+      const precipProb = hourlyData.precipitation_probability[actualIndex] ?? 0;
+      const weatherCode = getHourlyWeatherCode(precipProb, currentCode);
 
-        return {
-          time: i === 0 ? "Ahora" : `${hour}:00`,
-          temp,
-          precipProb,
-          weatherCode,
-          isNow: i === 0,
-          night: hourIsNight(hour),
-          actualIndex,
-        };
-      });
+      return {
+        time: i === 0 ? "Ahora" : `${hour}:00`,
+        temp,
+        precipProb,
+        weatherCode,
+        isNow: i === 0,
+        night: hourIsNight(hour),
+        actualIndex,
+      };
+    });
   }, [hourlyData, currentCode, currentTime]);
 
   const scroll = (direction: "left" | "right") => {
@@ -150,7 +150,11 @@ export default function HourlyForecast({
       <div
         ref={scrollRef}
         className="flex gap-2 overflow-x-auto snap-x snap-mandatory py-1"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-x pan-y" }}
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          touchAction: "pan-x pan-y",
+        }}
       >
         {hours.map((hour) => (
           <button
@@ -164,9 +168,7 @@ export default function HourlyForecast({
             style={{ width: 66 }}
           >
             {/* Time */}
-            <span className="text-[12px] text-text-secondary">
-              {hour.time}
-            </span>
+            <span className="text-[12px] text-text-secondary">{hour.time}</span>
 
             {/* Icon */}
             <div className="flex items-center justify-center">
@@ -186,7 +188,8 @@ export default function HourlyForecast({
             <span
               className="text-[11px] font-medium"
               style={{
-                color: hour.precipProb > 25 ? "var(--color-rain)" : "transparent",
+                color:
+                  hour.precipProb > 25 ? "var(--color-rain)" : "transparent",
               }}
             >
               {hour.precipProb}%
