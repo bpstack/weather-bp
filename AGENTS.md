@@ -6,7 +6,7 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
 
 ## Estado real del proyecto (verificado contra el árbol, 2026-08-04)
 
-- **Sí hay tests.** 6 archivos en `__tests__/` con 61 tests (Vitest 4 + Testing Library + jsdom),
+- **Sí hay tests.** 7 archivos en `__tests__/` con 95 tests (Vitest 4 + Testing Library + jsdom),
   y scripts `pnpm test` / `pnpm test:run` / `pnpm test:coverage`. Deben pasar antes de commitear.
   Fixture compartido de `WeatherData` en `__tests__/fixtures/weather.ts`: úsalo en vez de
   construir objetos a mano. _(Este archivo afirmaba
@@ -137,8 +137,8 @@ pnpm build         # producción (webpack, regenera public/sw.js)
 | -------------------- | ------------------------------------------------------------ |
 | `pnpm lint`          | ✅ 0 problemas                                               |
 | `pnpm format:check`  | ✅ 0 archivos pendientes                                     |
-| `pnpm test:run`      | ✅ 61 tests en 6 archivos, todos pasan (~5 s)                |
-| `pnpm test:coverage` | ✅ 36,5 % sentencias · 31,0 % ramas                          |
+| `pnpm test:run`      | ✅ 95 tests en 7 archivos, todos pasan (~5 s)                |
+| `pnpm test:coverage` | ✅ 40,9 % sentencias · 34,4 % ramas                          |
 | `pnpm build`         | ✅ verde, 4 rutas estáticas — deja `public/sw.js` modificado |
 
 Dos avisos no bloqueantes y preexistentes: `caniuse-lite` con 8 meses de antigüedad y
