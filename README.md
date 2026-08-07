@@ -82,6 +82,7 @@ app/
     ├── page.tsx            # Thin entry: renders <WeatherClient/>
     └── services/
         ├── weather-service.ts  # Zod schema, typed fetcher, URL builder
+        ├── air-quality.ts      # Air quality + pollen fetcher, AQI/pollen bands
         ├── city-utils.ts       # Geolocation (Nominatim), popular cities, continent mapping
         └── weather-utils.tsx   # WMO code → icon/text mapping (28+ conditions)
 ```
