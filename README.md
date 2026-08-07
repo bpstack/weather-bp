@@ -87,6 +87,9 @@ app/
         └── weather-utils.tsx   # WMO code → icon/text mapping (28+ conditions)
 ```
 
+Service contracts (error behavior, null filling, local timestamps) live in
+[`app/weather/services/README.md`](app/weather/services/README.md).
+
 ```
 hooks/
 ├── useWeatherLocation.ts  # Selected city: stored-manual vs. geolocation, persistence
