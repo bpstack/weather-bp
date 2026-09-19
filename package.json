@@ -16,7 +16,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "verify": "pnpm run lint --max-warnings=0 && pnpm run typecheck && pnpm run format:check && pnpm run test:run"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

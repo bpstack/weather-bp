@@ -1,0 +1,40 @@
+# The CI calls `pnpm run verify` and nothing else. What `verify` covers is
+# defined by `package.json`, so adding a check does not touch this file, and
+# what runs locally is what runs here.
+#
+# Requires: a `verify` script in `package.json`, a `.nvmrc`, and
+# `packageManager`.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      # Actions pinned to the major. Check the major still sits on a live Node
+      # runtime: when the old one is switched off, the CI goes red without
+      # anyone having touched the repo.
+      - uses: actions/checkout@v7
+
+      # The pnpm version comes from `packageManager`.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # `--frozen-lockfile`: install the exact versions in the lockfile, or
+      # fail. Without it the CI can resolve versions the local install did not.
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run verify
+
+      # Uncomment once there are production dependencies. It sits outside
+      # `verify` because it depends on a third party's advisory and can turn red
+      # without the repo changing, and an intermittent CI ends up ignored.
+      # - run: pnpm audit --audit-level=high
