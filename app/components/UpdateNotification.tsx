@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-// Activa esto cuando despliegues cambios de manifest/iconos que requieran reinstalar
-const SHOW_REINSTALL_TIP = true;
+// Ponlo a `true` al desplegar cambios que solo llegan reinstalando la PWA
+// (public/manifest.json, iconos de public/, metadatos `appleWebApp` de
+// app/layout.tsx) y vuelve a `false` unas semanas después.
+// Último cambio de ese tipo: iconos, 2026-06-09.
+const SHOW_REINSTALL_TIP = false;
 
 export default function UpdateNotification() {
   const [showUpdate, setShowUpdate] = useState(false);
