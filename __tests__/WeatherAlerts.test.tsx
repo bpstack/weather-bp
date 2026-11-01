@@ -284,4 +284,59 @@ describe("WeatherAlerts", () => {
     expect(screen.getByText("Tormenta eléctrica")).toBeInTheDocument();
     expect(screen.getByText("UV extremo")).toBeInTheDocument();
   });
+
+  // Severity is announced in words, not only by colour (WCAG 1.4.1):
+  // information for rain, caution for nuisances, danger for real hazards.
+  describe("severity", () => {
+    const alertFor = (overrides: Parameters<typeof makeWeather>[0]) => {
+      render(<WeatherAlerts weather={makeWeather(overrides)} />);
+      return screen.getByRole("alert");
+    };
+
+    it("announces rain on the way as information", () => {
+      expect(
+        alertFor({ hourly: { precipitation_probability: [40, 0, 0] } }),
+      ).toHaveTextContent(/^Aviso:\s*Lluvia probable/);
+    });
+
+    it("announces strong wind, cold, snow and very high UV as caution", () => {
+      expect(alertFor({ current: { wind_speed_10m: 30 } })).toHaveTextContent(
+        /^Precaución:/,
+      );
+    });
+
+    it("announces a thunderstorm, extreme heat and extreme UV as danger", () => {
+      expect(alertFor({ current: { weather_code: 95 } })).toHaveTextContent(
+        /^Peligro:\s*Tormenta eléctrica/,
+      );
+    });
+
+    it("tells very high UV (caution) apart from extreme UV (danger)", () => {
+      const { unmount } = render(
+        <WeatherAlerts
+          weather={makeWeather({ daily: { uv_index_max: [9] } })}
+        />,
+      );
+      expect(screen.getByRole("alert")).toHaveTextContent(/^Precaución:/);
+      unmount();
+      expect(alertFor({ daily: { uv_index_max: [11] } })).toHaveTextContent(
+        /^Peligro:/,
+      );
+    });
+
+    it("lists the most severe alert first", () => {
+      render(
+        <WeatherAlerts
+          weather={makeWeather({
+            current: { wind_speed_10m: 40, weather_code: 95 },
+            hourly: { precipitation_probability: [40, 0, 0] },
+          })}
+        />,
+      );
+      const order = screen
+        .getAllByRole("alert")
+        .map((a) => a.textContent?.split(":")[0]);
+      expect(order).toEqual(["Peligro", "Precaución", "Aviso"]);
+    });
+  });
 });
