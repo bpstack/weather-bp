@@ -146,10 +146,24 @@ offline-first mediante Serwist. En producción: [weather.stackbp.es](https://wea
 | `AGENTS.md`/`CLAUDE.md` | Sí         | Las convenciones son inútiles si no llegan a la otra máquina |
 | `.agents/`, `.claude/`  | No         | Skills de terceros y estado local. Ver abajo                 |
 | `ROADMAP.md`, `TODO.md` | No         | Backlog y método de trabajo, privados                        |
-| `docs/`                 | Sí         | Decisiones y estado viajan                                   |
+| `docs/`                 | **No**     | Privado: el repo es público. Ver la excepción de abajo       |
 
 ⚠️ `TODO.md` y `ROADMAP.md` no llegan al repo, así que **un agente en otra máquina no los ve**.
 No asumas que existen ni cites tareas de ellos en commits.
+
+#### Excepción a las reglas 12 y 13: `docs/` no se versiona
+
+- **Qué:** `docs/` (con `SESSION.md`, `DECISIONS.md` y `_archive/`) está en `.gitignore` y
+  **no viaja** entre máquinas. Las reglas 12 y 13 se cumplen en el contenido (dónde se
+  escribe el estado y el razonamiento), no en que llegue a git.
+- **Por qué:** el repo es público y esa documentación es interna. Decisión del propietario
+  (2026-11-01).
+- **Alcance:** solo `docs/`. No cubre seguridad, rastros de IA ni push.
+- **Consecuencia:** en otra máquina `docs/` puede no existir o estar desfasado. **No
+  asumas su contenido** ni lo cites en commits, igual que con `TODO.md`.
+
+_(⚠️ Corregido el 2026-11-01: esta tabla decía que `docs/` se versionaba, pero el
+`.gitignore` lo excluía desde antes y `git log -- docs/` está vacío. Nunca viajó.)_
 
 ⚠️ `CLAUDE.md` es solo `@AGENTS.md`. **Este archivo es la única fuente**: no dupliques reglas
 allí, o los dos textos divergen (ya pasó: durante meses este archivo afirmaba que no había tests).
