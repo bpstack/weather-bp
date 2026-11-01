@@ -11,7 +11,10 @@ import {
   Sunset,
 } from "lucide-react";
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherInfo } from "@/app/weather/services/weather-utils";
+import {
+  getWeatherInfo,
+  parseLocalDate,
+} from "@/app/weather/services/weather-utils";
 import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 
 interface DailyDetailModalProps {
@@ -43,7 +46,9 @@ export default function DailyDetailModal({
 }: DailyDetailModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const daily = weather.daily;
-  const date = daily.time[dayIndex] ? new Date(daily.time[dayIndex]) : null;
+  const date = daily.time[dayIndex]
+    ? parseLocalDate(daily.time[dayIndex])
+    : null;
 
   const dayStr = date
     ? date.toLocaleDateString("es-ES", { weekday: "long" })

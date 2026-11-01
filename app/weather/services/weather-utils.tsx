@@ -5,6 +5,15 @@ import type { WeatherData } from "./weather-service";
 
 export const icons = { MapPin, Navigation, Loader2 };
 
+/**
+ * Parses an Open-Meteo date ("2026-11-02") as local midnight. `new Date()` on
+ * a date-only string means UTC midnight, which is still the previous day for
+ * anyone west of UTC.
+ */
+export function parseLocalDate(date: string): Date {
+  return new Date(`${date}T00:00`);
+}
+
 export function isNightTime(weather: WeatherData): boolean {
   // Prefer the API's is_day flag (handles polar day/night, DST, etc.);
   // fall back to sunrise/sunset comparison when it is unavailable.

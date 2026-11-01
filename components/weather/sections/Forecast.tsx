@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
-import { getWeatherInfo } from "@/app/weather/services/weather-utils";
+import {
+  getWeatherInfo,
+  parseLocalDate,
+} from "@/app/weather/services/weather-utils";
 import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 import DailyDetailModal from "./DailyDetailModal";
 
@@ -21,17 +24,18 @@ export default function Forecast({
 }: Props) {
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
 
-  const days = weather.daily.time.slice(0, forecastDays);
+  // Open-Meteo leaves the last day null when the model run ends before that
+  // local day does (seen for UTC+ cities at 16 days). A day without data is
+  // dropped rather than drawn as 0°, and kept out of the shared scale.
+  const days = weather.daily.time.slice(0, forecastDays).flatMap((date, i) => {
+    const max = weather.daily.temperature_2m_max[i];
+    const min = weather.daily.temperature_2m_min[i];
+    return max == null || min == null ? [] : [{ date, i, max, min }];
+  });
 
-  // Compute week-level min/max for the range bar
-  const visibleMaxes = days.map(
-    (_, i) => weather.daily.temperature_2m_max[i] ?? 0,
-  );
-  const visibleMins = days.map(
-    (_, i) => weather.daily.temperature_2m_min[i] ?? 0,
-  );
-  const weekMax = Math.max(...visibleMaxes);
-  const weekMin = Math.min(...visibleMins);
+  // Shared min/max for the range bars, from the days actually listed.
+  const weekMax = Math.max(...days.map((d) => d.max));
+  const weekMin = Math.min(...days.map((d) => d.min));
   const weekSpan = weekMax - weekMin || 1;
 
   return (
@@ -67,16 +71,15 @@ export default function Forecast({
         La barra indica el rango de cada día:{" "}
         <span style={{ color: "var(--color-rain)" }}>mínima</span> a la
         izquierda, <span style={{ color: "var(--color-sun)" }}>máxima</span> a
-        la derecha, comparado con toda la semana.
+        la derecha, comparado con todos los días de la lista.
       </p>
 
       {/* Forecast list in a glass card */}
       <div className="glass-card overflow-hidden">
-        {days.map((date, i) => {
+        {days.map(({ date, i, max: dayMax, min: dayMin }, row) => {
           const isToday = i === 0;
           const weatherInfo = getWeatherInfo(weather.daily.weather_code[i]);
-          const dayMax = weather.daily.temperature_2m_max[i] ?? weekMin;
-          const dayMin = weather.daily.temperature_2m_min[i] ?? weekMin;
+          const day = parseLocalDate(date);
 
           // Range bar geometry (min 10% width)
           const barLeft = ((dayMin - weekMin) / weekSpan) * 100;
@@ -87,7 +90,7 @@ export default function Forecast({
               key={date}
               onClick={() => setSelectedDayIndex(i)}
               className={`flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-white/30 dark:hover:bg-white/[0.04] transition-colors ${
-                i !== 0
+                row !== 0
                   ? "border-t border-[rgba(0,0,0,0.05)] dark:border-[rgba(255,255,255,0.05)]"
                   : ""
               }`}
@@ -99,12 +102,12 @@ export default function Forecast({
                 >
                   {isToday
                     ? "Hoy"
-                    : new Date(date).toLocaleDateString("es-ES", {
+                    : day.toLocaleDateString("es-ES", {
                         weekday: "short",
                       })}
                 </p>
                 <p className="text-[10px] text-text-tertiary">
-                  {new Date(date).toLocaleDateString("es-ES", {
+                  {day.toLocaleDateString("es-ES", {
                     day: "numeric",
                     month: "short",
                   })}
