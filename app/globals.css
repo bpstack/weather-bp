@@ -362,6 +362,13 @@
     animation: wx-snow 2.6s ease-in-out infinite;
   }
 
+  /* Light theme: white clouds and the moon have no edge against light cards
+     and nearly vanish. A soft shadow gives them a silhouette without
+     recolouring the artwork; dark theme already has the contrast. */
+  html:not(.dark) .wx-icon {
+    filter: drop-shadow(0 1px 1.5px rgb(15 23 42 / 0.28));
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .wx-spin,
     .wx-pulse,

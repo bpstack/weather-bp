@@ -453,6 +453,7 @@ export function WeatherIcon({
 
   return (
     <svg
+      className="wx-icon"
       width={size}
       height={size}
       viewBox="0 0 100 100"

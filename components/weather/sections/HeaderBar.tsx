@@ -32,8 +32,10 @@ function HeaderBar({ weather }: HeaderProps) {
           {/* Center: title + live badge */}
           <div className="flex items-center gap-2 self-center">
             <h1 className="font-semibold text-text-primary text-xs sm:text-sm whitespace-nowrap">
-              <span className="sm:hidden">☁️</span>
-              <span className="hidden sm:inline">☁️ Weather App</span>
+              <span className="sm:hidden wx-icon">☁️</span>
+              <span className="hidden sm:inline">
+                <span className="wx-icon">☁️</span> Weather App
+              </span>
             </h1>
             <span
               className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-semibold"
