@@ -1,6 +1,4 @@
-import { ReactNode } from "react";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
-import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 import type { WeatherData } from "./weather-service";
 
 export const icons = { MapPin, Navigation, Loader2 };
@@ -42,15 +40,6 @@ export function isNightTime(weather: WeatherData): boolean {
   const sunsetH = sunset ? parseInt(sunset.slice(11, 13), 10) : 20;
   return hour < sunriseH || hour >= sunsetH;
 }
-
-export const getWeatherIcon = (
-  code: number | null,
-  size: "sm" | "lg" = "lg",
-  night = false,
-): ReactNode => {
-  const px = size === "sm" ? 36 : 64;
-  return <WeatherIcon code={code ?? undefined} night={night} size={px} />;
-};
 
 // ── Dynamic background palette (from design reference) ────────────────
 type ThemeColors = {
