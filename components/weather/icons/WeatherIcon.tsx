@@ -97,6 +97,10 @@ interface MoonProps {
 }
 
 function Moon({ id, cx = 50, cy = 48, r = 16 }: MoonProps) {
+  // Crescent = full disc minus an offset disc, done with a mask. The previous
+  // two-arc path asked for an inner radius smaller than half its chord, which
+  // SVG silently enlarges, so both arcs coincided and the moon had no area:
+  // only the halo showed, as a grey blur.
   return (
     <g>
       <defs>
@@ -108,6 +112,28 @@ function Moon({ id, cx = 50, cy = 48, r = 16 }: MoonProps) {
           <stop offset="0%" stopColor="#FDFCF5" />
           <stop offset="100%" stopColor="#DCE3F2" />
         </linearGradient>
+        <mask
+          id={`${id}-mcut`}
+          maskUnits="userSpaceOnUse"
+          x={cx - r - 1}
+          y={cy - r - 1}
+          width={r * 2 + 2}
+          height={r * 2 + 2}
+        >
+          <rect
+            x={cx - r - 1}
+            y={cy - r - 1}
+            width={r * 2 + 2}
+            height={r * 2 + 2}
+            fill="white"
+          />
+          <circle
+            cx={cx + r * 0.42}
+            cy={cy - r * 0.32}
+            r={r * 0.86}
+            fill="black"
+          />
+        </mask>
       </defs>
       <circle
         className="wx-glow"
@@ -117,9 +143,13 @@ function Moon({ id, cx = 50, cy = 48, r = 16 }: MoonProps) {
         fill={`url(#${id}-mhalo)`}
       />
       <g className="wx-pulse">
-        <path
-          d={`M ${cx + r * 0.55} ${cy - r} a ${r} ${r} 0 1 0 ${r * 0.02} ${r * 2} a ${r * 0.82} ${r * 0.82} 0 1 1 ${-r * 0.02} ${-r * 2} Z`}
+        <circle
+          className="wx-moon"
+          cx={cx}
+          cy={cy}
+          r={r}
           fill={`url(#${id}-moon)`}
+          mask={`url(#${id}-mcut)`}
         />
       </g>
     </g>
