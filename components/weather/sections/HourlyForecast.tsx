@@ -2,6 +2,11 @@
 
 import { useRef, useMemo, useState } from "react";
 import { WeatherData } from "@/app/weather/services/weather-service";
+import {
+  getWeatherInfo,
+  isNightAt,
+  isNightTime,
+} from "@/app/weather/services/weather-utils";
 import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 import { ChevronLeft, ChevronRight, Globe } from "lucide-react";
 import HourlyDetailModal from "./HourlyDetailModal";
@@ -12,12 +17,6 @@ interface HourlyForecastProps {
   tempUnit: "C" | "F";
 }
 
-function getHourlyWeatherCode(precipProb: number, currentCode: number): number {
-  if (precipProb >= 60) return 61;
-  if (precipProb >= 30) return 51;
-  return currentCode;
-}
-
 function formatUtcOffset(seconds: number): string {
   const hours = Math.round(seconds / 3600);
   return hours >= 0 ? `+${hours}` : `${hours}`;
@@ -25,10 +24,6 @@ function formatUtcOffset(seconds: number): string {
 
 function getUserUtcOffsetSeconds(): number {
   return -new Date().getTimezoneOffset() * 60;
-}
-
-function hourIsNight(hour: number): boolean {
-  return hour < 7 || hour >= 21;
 }
 
 export default function HourlyForecast({
@@ -43,6 +38,8 @@ export default function HourlyForecast({
   const hourlyData = weather?.hourly;
   const currentCode = weather?.current?.weather_code ?? 0;
   const currentTime = weather?.current?.time;
+  const currentTemp = weather?.current?.temperature_2m;
+  const currentIsNight = isNightTime(weather);
   const cityUtcOffset = weather?.utc_offset_seconds ?? 0;
   const timezoneAbbr = weather?.timezone_abbreviation ?? "";
 
@@ -81,23 +78,38 @@ export default function HourlyForecast({
 
     return hourlyData.time.slice(startIndex, startIndex + 24).map((time, i) => {
       const actualIndex = startIndex + i;
-      const hourStr = time.slice(11, 13);
-      const hour = parseInt(hourStr, 10);
-      const temp = hourlyData.temperature_2m[actualIndex];
+      const hour = parseInt(time.slice(11, 13), 10);
+      const isNow = i === 0;
       const precipProb = hourlyData.precipitation_probability[actualIndex] ?? 0;
-      const weatherCode = getHourlyWeatherCode(precipProb, currentCode);
+      // "Ahora" mirrors the current-conditions card above it; every other hour
+      // shows that hour's own forecast, the same one its detail modal shows.
+      const temp = isNow
+        ? (currentTemp ?? hourlyData.temperature_2m[actualIndex])
+        : hourlyData.temperature_2m[actualIndex];
+      const weatherCode = isNow
+        ? currentCode
+        : hourlyData.weather_code[actualIndex];
+      const night = isNow ? currentIsNight : isNightAt(time, weather);
 
       return {
-        time: i === 0 ? "Ahora" : `${hour}:00`,
+        time: isNow ? "Ahora" : `${hour}:00`,
         temp,
         precipProb,
         weatherCode,
-        isNow: i === 0,
-        night: hourIsNight(hour),
+        condition: getWeatherInfo(weatherCode).text,
+        isNow,
+        night,
         actualIndex,
       };
     });
-  }, [hourlyData, currentCode, currentTime]);
+  }, [
+    weather,
+    hourlyData,
+    currentCode,
+    currentTime,
+    currentTemp,
+    currentIsNight,
+  ]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -160,6 +172,7 @@ export default function HourlyForecast({
           <button
             key={hour.time + hour.actualIndex}
             onClick={() => setSelectedHourIndex(hour.actualIndex)}
+            aria-label={`${hour.time}: ${formatTemp(hour.temp)}°, ${hour.condition}, ${hour.precipProb}% de lluvia`}
             className={`snap-start flex-shrink-0 flex flex-col items-center gap-[7px] px-1 py-3 rounded-[18px] transition-all cursor-pointer ${
               hour.isNow
                 ? "bg-accent-soft border border-transparent"

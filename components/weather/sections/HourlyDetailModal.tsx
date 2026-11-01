@@ -11,6 +11,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { WeatherData } from "@/app/weather/services/weather-service";
+import { isNightAt } from "@/app/weather/services/weather-utils";
 import { WeatherIcon } from "@/components/weather/icons/WeatherIcon";
 
 interface HourlyDetailModalProps {
@@ -37,10 +38,6 @@ function windDirection(degrees: number | null): string {
   return WIND_DIRS[Math.round(degrees / 45) % 8];
 }
 
-function hourIsNight(hour: number): boolean {
-  return hour < 7 || hour >= 21;
-}
-
 export default function HourlyDetailModal({
   weather,
   hourIndex,
@@ -52,8 +49,7 @@ export default function HourlyDetailModal({
   const timeStr = hourly.time[hourIndex] ?? "";
   const time = timeStr ? new Date(timeStr) : null;
 
-  const hourNum = timeStr ? parseInt(timeStr.slice(11, 13), 10) : 12;
-  const night = hourIsNight(hourNum);
+  const night = timeStr ? isNightAt(timeStr, weather) : false;
 
   const hourStr = time
     ? time.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })

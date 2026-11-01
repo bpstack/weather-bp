@@ -14,6 +14,21 @@ export function parseLocalDate(date: string): Date {
   return new Date(`${date}T00:00`);
 }
 
+/**
+ * Whether a local hour ("2026-11-02T06:00") falls outside that day's daylight,
+ * using the forecast's own sunrise/sunset. Both share Open-Meteo's local ISO
+ * format, so string comparison is chronological. Falls back to 07:00–21:00
+ * when the day has no sunrise/sunset (polar day/night, missing data).
+ */
+export function isNightAt(time: string, weather: WeatherData): boolean {
+  const day = weather.daily.time.indexOf(time.slice(0, 10));
+  const sunrise = day >= 0 ? weather.daily.sunrise[day] : null;
+  const sunset = day >= 0 ? weather.daily.sunset[day] : null;
+  if (sunrise && sunset) return time < sunrise || time >= sunset;
+  const hour = parseInt(time.slice(11, 13), 10);
+  return hour < 7 || hour >= 21;
+}
+
 export function isNightTime(weather: WeatherData): boolean {
   // Prefer the API's is_day flag (handles polar day/night, DST, etc.);
   // fall back to sunrise/sunset comparison when it is unavailable.

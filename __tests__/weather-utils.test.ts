@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  isNightAt,
   isNightTime,
   getWeatherBackground,
   getWeatherInfo,
@@ -56,6 +57,30 @@ describe("isNightTime", () => {
     expect(isNightTime(atHour("06"))).toBe(true);
     expect(isNightTime(atHour("07"))).toBe(false);
     expect(isNightTime(atHour("20"))).toBe(true);
+  });
+});
+
+describe("isNightAt", () => {
+  // Sydney, 2 Nov 2026: sunrise 05:54, sunset 19:23 (Open-Meteo, live).
+  const sydney = makeWeather({
+    daily: {
+      time: ["2026-11-02"],
+      sunrise: ["2026-11-02T05:54"],
+      sunset: ["2026-11-02T19:23"],
+    },
+  });
+
+  it("follows that day's sunrise and sunset, not a fixed clock", () => {
+    expect(isNightAt("2026-11-02T05:00", sydney)).toBe(true);
+    expect(isNightAt("2026-11-02T06:00", sydney)).toBe(false); // after sunrise
+    expect(isNightAt("2026-11-02T19:00", sydney)).toBe(false);
+    expect(isNightAt("2026-11-02T20:00", sydney)).toBe(true); // after sunset
+  });
+
+  it("falls back to 07:00-21:00 for a day with no sunrise or sunset", () => {
+    expect(isNightAt("2026-11-09T06:00", sydney)).toBe(true);
+    expect(isNightAt("2026-11-09T12:00", sydney)).toBe(false);
+    expect(isNightAt("2026-11-09T21:00", sydney)).toBe(true);
   });
 });
 
