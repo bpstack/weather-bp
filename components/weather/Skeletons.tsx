@@ -1,4 +1,4 @@
-export function Skeleton({ className = "" }: { className?: string }) {
+function Skeleton({ className = "" }: { className?: string }) {
   return (
     <div
       className={`animate-pulse bg-layer-2 rounded-lg ${className}`}

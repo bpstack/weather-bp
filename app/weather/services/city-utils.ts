@@ -80,7 +80,7 @@ export const getContinent = (countryCode: string): string => {
   return countryToContinent[countryCode] || "Otros";
 };
 
-export const popularCities: GeocodingCity[] = [
+const popularCities: GeocodingCity[] = [
   {
     id: 1,
     name: "Madrid",
@@ -337,12 +337,12 @@ export const popularCities: GeocodingCity[] = [
 
 export const getPopularCities = () => popularCities;
 
-export interface GeolocationResult {
+interface GeolocationResult {
   city: GeocodingCity;
   error?: never;
 }
 
-export interface GeolocationError {
+interface GeolocationError {
   city?: never;
   error: string;
 }
