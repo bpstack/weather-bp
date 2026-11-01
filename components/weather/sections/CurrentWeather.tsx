@@ -40,7 +40,7 @@ export default function CurrentWeather({
     },
     {
       icon: Zap,
-      label: "Índice UV",
+      label: "UV máx.",
       value: Math.round(weather.daily.uv_index_max?.[0] ?? 0).toString(),
       colorClass: "text-sun",
     },

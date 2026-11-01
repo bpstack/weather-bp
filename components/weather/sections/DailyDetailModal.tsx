@@ -126,7 +126,7 @@ export default function DailyDetailModal({
     },
     {
       icon: Sun,
-      label: "Índice UV",
+      label: "UV máx.",
       value: `${Math.round(daily.uv_index_max[dayIndex] ?? 0)}`,
       colorClass: "text-sun",
     },

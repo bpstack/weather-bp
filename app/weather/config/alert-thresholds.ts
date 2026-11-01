@@ -16,7 +16,7 @@ export const ALERT_THRESHOLDS = {
   cold: 5,
   /** km/h — "Viento fuerte". Roughly Beaufort 5, when walking gets uncomfortable. */
   wind: 30,
-  /** UV index — "UV extremo". WHO rates 8-10 as "very high". */
+  /** UV index — fires the UV alert. WHO rates 8-10 "very high", 11+ "extreme". */
   uv: 8,
   /** % — "Lluvia probable", on the highest of the next 3 hours. */
   rain: 30,
@@ -33,6 +33,12 @@ export const ALERT_THRESHOLDS = {
  * Guards the nowcast against trace amounts the user would never notice.
  */
 export const RAIN_MM = 0.1;
+
+/**
+ * UV index from which the alert reads "UV extremo" instead of "UV muy alto",
+ * following the WHO bands (8-10 very high, 11+ extreme).
+ */
+export const UV_EXTREME = 11;
 
 /** Minutes ahead the nowcast looks for the first wet 15-minute slot. */
 export const NOWCAST_WINDOW_MIN = 60;

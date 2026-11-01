@@ -7,6 +7,7 @@ import {
   RAIN_MM,
   NOWCAST_IMMINENT_MIN,
   NOWCAST_WINDOW_MIN,
+  UV_EXTREME,
 } from "@/app/weather/config/alert-thresholds";
 import { AlertTriangle } from "lucide-react";
 
@@ -122,12 +123,13 @@ export default function WeatherAlerts({ weather }: WeatherAlertsProps) {
     });
   }
 
+  // Today's peak, named on the WHO scale: 8-10 "very high", 11+ "extreme".
   const uvMax = weather?.daily?.uv_index_max?.[0];
   if (uvMax != null && uvMax >= THRESHOLDS.uv) {
     alerts.push({
       id: "uv",
-      title: "UV extremo",
-      description: `Índice ${Math.round(uvMax)}`,
+      title: Math.round(uvMax) >= UV_EXTREME ? "UV extremo" : "UV muy alto",
+      description: `Máximo hoy: ${Math.round(uvMax)}`,
     });
   }
 

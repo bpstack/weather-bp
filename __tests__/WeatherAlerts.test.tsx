@@ -69,14 +69,40 @@ describe("WeatherAlerts", () => {
       expect(screen.getByText("30 km/h")).toBeInTheDocument();
     });
 
-    it("fires extreme UV at index 8", () => {
+    // Names follow the WHO UV bands: 8-10 "very high", 11+ "extreme".
+    it("fires at index 8 and names it very high, not extreme", () => {
       render(
         <WeatherAlerts
           weather={makeWeather({ daily: { uv_index_max: [8] } })}
         />,
       );
+      expect(screen.getByText("UV muy alto")).toBeInTheDocument();
+      expect(screen.queryByText("UV extremo")).not.toBeInTheDocument();
+      expect(screen.getByText("Máximo hoy: 8")).toBeInTheDocument();
+    });
+
+    it("names index 10 very high and 11 extreme", () => {
+      const { rerender } = render(
+        <WeatherAlerts
+          weather={makeWeather({ daily: { uv_index_max: [10] } })}
+        />,
+      );
+      expect(screen.getByText("UV muy alto")).toBeInTheDocument();
+      rerender(
+        <WeatherAlerts
+          weather={makeWeather({ daily: { uv_index_max: [11] } })}
+        />,
+      );
       expect(screen.getByText("UV extremo")).toBeInTheDocument();
-      expect(screen.getByText("Índice 8")).toBeInTheDocument();
+    });
+
+    it("does not fire below index 8", () => {
+      const { container } = render(
+        <WeatherAlerts
+          weather={makeWeather({ daily: { uv_index_max: [7.4] } })}
+        />,
+      );
+      expect(container).toBeEmptyDOMElement();
     });
   });
 
