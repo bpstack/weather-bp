@@ -196,7 +196,7 @@ export default function WeatherClient() {
         transition: "background 0.5s ease",
       }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl lg:max-w-6xl mx-auto">
         <HeaderBar weather={weather} />
 
         <CitySelector
@@ -219,29 +219,49 @@ export default function WeatherClient() {
           <>
             <WeatherAlerts weather={weather} />
 
-            <CurrentWeather
-              weather={weather}
-              tempUnit={tempUnit}
-              setTempUnit={handleTempUnitChange}
-              formatTemp={formatTemp}
-            />
+            {/*
+             * Below lg: one column, ordered with `order` (now, hours, details,
+             * forecast). From lg: two real columns; the left one stays in view
+             * while the forecast scrolls. Details holds nothing focusable, so
+             * tab order matches what is seen at every width.
+             */}
+            <div className="flex flex-col lg:grid lg:grid-cols-2 lg:gap-x-10 lg:items-start">
+              <div className="contents lg:block lg:sticky lg:top-20">
+                <div className="order-1">
+                  <CurrentWeather
+                    weather={weather}
+                    tempUnit={tempUnit}
+                    setTempUnit={handleTempUnitChange}
+                    formatTemp={formatTemp}
+                  />
+                </div>
+                <div className="order-3">
+                  <WeatherDetails weather={weather} airQuality={airQuality} />
+                </div>
+              </div>
 
-            <HourlyForecast
-              weather={weather}
-              formatTemp={formatTemp}
-              tempUnit={tempUnit}
-            />
-
-            <WeatherDetails weather={weather} airQuality={airQuality} />
-
-            {weather.daily && (
-              <Forecast
-                weather={weather}
-                forecastDays={forecastDays}
-                setForecastDays={setForecastDays}
-                formatTemp={formatTemp}
-              />
-            )}
+              <div className="contents lg:block">
+                {/* -mt-6 cancels the section's top padding so its heading
+                    lines up with the top of the current-conditions card. */}
+                <div className="order-2 lg:-mt-6">
+                  <HourlyForecast
+                    weather={weather}
+                    formatTemp={formatTemp}
+                    tempUnit={tempUnit}
+                  />
+                </div>
+                {weather.daily && (
+                  <div className="order-4">
+                    <Forecast
+                      weather={weather}
+                      forecastDays={forecastDays}
+                      setForecastDays={setForecastDays}
+                      formatTemp={formatTemp}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         )}
 

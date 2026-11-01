@@ -12,7 +12,7 @@ interface HeaderProps {
 function HeaderBar({ weather }: HeaderProps) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-subtle">
-      <div className="max-w-4xl mx-auto px-3 sm:px-6">
+      <div className="max-w-4xl lg:max-w-6xl mx-auto px-3 sm:px-6">
         {/* 3-column grid prevents center element from overlapping sides */}
         <div
           className="grid h-14"

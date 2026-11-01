@@ -131,7 +131,9 @@ export default function WeatherDetails({ weather, airQuality }: Props) {
         Detalles
       </h3>
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-2.5">
+      {/* From sm, as many 160px+ columns as fit: 5 in a full-width row, 3 in
+          the desktop side column, never so narrow that labels overflow. */}
+      <div className="grid grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3 sm:gap-2.5">
         {details.map(({ icon: Icon, label, value, colorClass }) => (
           <div
             key={label}
