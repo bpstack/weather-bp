@@ -119,7 +119,12 @@ async function checkGeocodingOSM() {
   try {
     const res = await fetch(
       "https://nominatim.openstreetmap.org/reverse?lat=40.42&lon=-3.70&format=json&accept-language=es",
-      { signal: AbortSignal.timeout(5000) },
+      {
+        signal: AbortSignal.timeout(5000),
+        headers: {
+          "User-Agent": "WeatherBP/1.0 (https://weather.stackbp.es)",
+        },
+      },
     );
     const latency_ms = Date.now() - start;
 
